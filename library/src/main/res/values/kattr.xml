@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="KRefreshLayout">
+        <attr name="k_pincontent" format="boolean"/>
+        <attr name="k_keepheader" format="boolean"/>
+        <attr name="k_durationoffset" format="integer"/>
+    </declare-styleable>
+</resources>
