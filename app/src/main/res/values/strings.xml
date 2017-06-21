@@ -8,5 +8,6 @@
         <item>ClassicalHeader</item>
         <item>MateriaHeader</item>
         <item>RentalsSunHeader</item>
+        <item>StoreHouseHeader</item>
     </string-array>
 </resources>

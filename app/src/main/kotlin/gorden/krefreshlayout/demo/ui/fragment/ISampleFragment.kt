@@ -6,6 +6,7 @@ import gorden.krefreshlayout.demo.header.ClassicalHeader
 import gorden.krefreshlayout.demo.header.NullHeader
 import gorden.krefreshlayout.demo.header.materia.MateriaProgressHeader
 import gorden.krefreshlayout.demo.header.rentals.RentalsSunHeaderView
+import gorden.krefreshlayout.demo.header.storehouse.StoreHouseHeader
 import gorden.krefreshlayout.demo.util.DensityUtil
 import gorden.refresh.KRefreshLayout
 
@@ -62,6 +63,7 @@ abstract class ISampleFragment : Fragment() {
             0 -> mRefreshLayout.setHeaderView(ClassicalHeader(context))
             1 -> mRefreshLayout.setHeaderView(MateriaProgressHeader(context), ViewGroup.LayoutParams.MATCH_PARENT, DensityUtil.dip2px(80))
             2 -> mRefreshLayout.setHeaderView(RentalsSunHeaderView(context))
+            3 -> mRefreshLayout.setHeaderView(StoreHouseHeader(context))
             else -> mRefreshLayout.setHeaderView(NullHeader(context))
         }
     }

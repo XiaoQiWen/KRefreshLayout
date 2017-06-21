@@ -16,4 +16,7 @@ public class DensityUtil {
     public static int dip2px(float dp){
         return (int) (dp*density);
     }
+    public static int appWidth(){
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
 }
