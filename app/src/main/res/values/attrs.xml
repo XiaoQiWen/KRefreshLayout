@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AdViewPager">
+        <attr name="ad_points_visibility" format="boolean"/>
+        <attr name="ad_points_position" format="enum">
+            <enum name="CENTER" value="0"/>
+            <enum name="LEFT" value="1"/>
+            <enum name="RIGHT" value="2"/>
+        </attr>
+        <attr name="ad_points_container_background" format="reference|color"/>
+    </declare-styleable>
+</resources>
