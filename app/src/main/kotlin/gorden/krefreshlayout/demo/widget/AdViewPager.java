@@ -1,4 +1,4 @@
-package gorden.krefreshlayout.demo;
+package gorden.krefreshlayout.demo.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -22,6 +22,8 @@ import android.widget.RelativeLayout;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+
+import gorden.krefreshlayout.demo.R;
 
 /**
  * 广告轮播ViewPager

@@ -58,3 +58,7 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+
+gradlew
+gradlew.bat
+*.iml

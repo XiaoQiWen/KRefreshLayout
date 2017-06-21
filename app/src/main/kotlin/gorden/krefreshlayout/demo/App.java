@@ -1,7 +1,9 @@
 package gorden.krefreshlayout.demo;
 
 import android.app.Application;
+import android.content.Intent;
 
+import gorden.krefreshlayout.demo.ui.SampleActivity;
 import gorden.krefreshlayout.demo.util.CrashHandler;
 
 /**

@@ -21,7 +21,7 @@ import android.widget.OverScroller
  * Universal pull down the refresh frame
  * version 1.1
  */
-class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : ViewGroup(context, attrs,defStyleAttr),NestedScrollingParent {
+class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : ViewGroup(context, attrs, defStyleAttr), NestedScrollingParent {
     private val LOG_TAG = "LOG_KRefreshLayout"
 
     private var mHeader: KRefreshHeader? = null
@@ -55,8 +55,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
     private var mOffsetAnimator: ValueAnimator? = null
     private var mGesture: GestureDetectorCompat? = null
 
-    constructor(context: Context):this(context,null)
-    constructor(context: Context,attrs: AttributeSet?):this(context,attrs,0)
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     init {
         mScroller = OverScroller(context)
@@ -102,7 +102,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
 
     @Suppress("unused")
     class LayoutParams : ViewGroup.MarginLayoutParams {
-
         constructor(c: Context, attrs: AttributeSet) : super(c, attrs)
 
         constructor(width: Int, height: Int) : super(width, height)
@@ -113,7 +112,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        mHeader.let {
+        if (mHeader != null && !isInEditMode) {
             val lp = mHeader!!.getView().layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
             val childTop = paddingTop + lp.topMargin - mHeader!!.getView().measuredHeight + mCurrentOffset
@@ -122,7 +121,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
             mHeader!!.getView().layout(childLeft, childTop, childRight, childBottom)
         }
 
-        mContentView.let {
+        if (mContentView != null) {
             val lp = mContentView!!.layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
             val childTop = paddingTop + lp.topMargin + if (mIsPinContent) 0 else mCurrentOffset
@@ -166,7 +165,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                mIsBeingDragged = mCurrentOffset>0
+                mIsBeingDragged = mCurrentOffset > 0
                 mInitialDownY = ev.y
                 mGesture?.onTouchEvent(ev)
             }
@@ -176,7 +175,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
                 }
             }
             MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_CANCEL -> mIsBeingDragged = mCurrentOffset>0
+            MotionEvent.ACTION_CANCEL -> mIsBeingDragged = mCurrentOffset > 0
         }
 
         return mIsBeingDragged
@@ -242,7 +241,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
     }
 
     override fun onNestedScroll(target: View, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) {
-        var mUnconsumed:Int=dyUnconsumed
+        var mUnconsumed: Int = dyUnconsumed
         if (dyUnconsumed < 0 && !canChildScrollUp() && mCurrentOffset < mHeader!!.maxOffsetHeight()) {
             if (mCurrentOffset - dyUnconsumed > mHeader!!.maxOffsetHeight()) {
                 mUnconsumed = mCurrentOffset - mHeader!!.maxOffsetHeight()
@@ -262,11 +261,13 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
         }
         //如果当前偏移量大于0，则交给KrefreshLayout处理Fling事件
         if (mCurrentOffset > 0) {
-            mLastFlingY = 0
-            mIsFling = true
-            mFlingMaxHeight = mHeader!!.maxOffsetHeight()
-            mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
-            invalidate()
+            if (mRefreshing && velocityY > 0) {
+                mLastFlingY = 0
+                mIsFling = true
+                mFlingMaxHeight = mHeader!!.maxOffsetHeight()
+                mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
+                invalidate()
+            }
             return true
         } else
             return false
@@ -327,9 +328,14 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
      * 计算实际偏移量
      */
     private fun calculateOffset(offset: Int): Int {
-        val mOffset:Int
-        //下拉阻力(0f-1f) 越小阻力越大，当前计算公式:1-mDistanceY/maxheight
-        val downResistance = if (offset > 0) 0.8f else 1f - mCurrentOffset.toFloat() / mHeader!!.maxOffsetHeight()
+        val mOffset: Int
+        val downResistance: Float
+        if (offset > 0) {
+            downResistance = 0.8f
+        } else {
+            //下拉阻力(0f-1f) 越小阻力越大，当前计算公式:1-mCurrentOffset/maxheight
+            downResistance = 1f - mCurrentOffset.toFloat() / mHeader!!.maxOffsetHeight()
+        }
         if (offset > 0) {
             mOffset = Math.min(MAX_OFFSET, Math.ceil((downResistance * offset).toDouble()).toInt())
         } else {
@@ -345,15 +351,21 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
      * *               //     * @param requiresUpdate 是否需要更新
      */
     private fun moveView(offset: Int) {
+        var invalidate = false
         if (!mRefreshing && mCurrentOffset == 0 && offset > 0) {
             mHeader?.onPrepare(this)
+            invalidate = true
+        }
+
+        if (mCurrentOffset > height) {
+            invalidate = true
         }
 
         mCurrentOffset += offset
         mHeader!!.getView().offsetTopAndBottom(offset)
         if (!mIsPinContent)
             mContentView?.offsetTopAndBottom(offset)
-
+        if (invalidate) invalidate()
         mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / mHeader!!.refreshHeight(), mRefreshing)
 
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
@@ -417,7 +429,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
         if (mCurrentOffset == target) {
             return
         }
-        val mTarget:Int = if (mKeepHeaderWhenRefresh) target else 0
+        val mTarget: Int = if (mKeepHeaderWhenRefresh) target else 0
 
         Log.d(LOG_TAG, "animTo $mCurrentOffset to $mTarget")
         mOffsetAnimator?.duration = mDurationOffset
@@ -432,8 +444,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
         mRefreshListener = refreshListener
     }
 
-    fun setKRefreshListener(refreshListener:(KRefreshLayout) -> Unit) :Unit{
-        mRefreshListener = object :KRefreshListener{
+    fun setKRefreshListener(refreshListener: (KRefreshLayout) -> Unit): Unit {
+        mRefreshListener = object : KRefreshListener {
             override fun onRefresh(refreshLayout: KRefreshLayout) {
                 refreshListener(refreshLayout)
             }
@@ -453,13 +465,13 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
             mIsPinContent = pinContent
             if (mIsPinContent) {
                 mHeader?.getView()?.bringToFront()
-            }else{
+            } else {
                 mContentView?.bringToFront()
             }
         }
     }
 
-    fun setDurationOffset(duration:Long){
+    fun setDurationOffset(duration: Long) {
         mDurationOffset = duration
     }
 
@@ -479,8 +491,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
             removeView(mHeader?.getView())
         }
         mHeader = headerView
-        addView(mHeader?.getView(),0, params)
-        if (mIsPinContent){
+        addView(mHeader?.getView(), 0, params)
+        if (mIsPinContent) {
             mHeader!!.getView().bringToFront()
         }
     }
@@ -513,8 +525,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?,defStyleAttr:Int) : 
                 mHeader?.onReset(this)
             } else {
                 //刷新完成停滞时间
+                mRefreshing = false
                 postDelayed({
-                    mRefreshing = false
                     animTo(0)
                 }, if (isSuccess) mHeader!!.succeedRetention() else mHeader!!.failingRetention())
             }

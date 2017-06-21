@@ -20,6 +20,7 @@ import android.widget.TextView;
 import org.jetbrains.annotations.NotNull;
 
 import gorden.krefreshlayout.demo.R;
+import gorden.krefreshlayout.demo.util.DensityUtil;
 import gorden.refresh.KRefreshHeader;
 import gorden.refresh.KRefreshLayout;
 
@@ -57,7 +58,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
         arrawImg = new ImageView(context);
         arrawImg.setImageResource(R.drawable.ic_arrow_down);
         arrawImg.setScaleType(ImageView.ScaleType.CENTER);
-        root.addView(arrawImg,38,62);
+        root.addView(arrawImg);
 
         textTitle = new TextView(context);
         textTitle.setTextSize(13);
@@ -71,6 +72,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
         rotateAnimation.setInterpolator(new LinearInterpolator());
         rotateAnimation.setRepeatCount(Animation.INFINITE);
         rotateAnimation.setRepeatMode(Animation.RESTART);
+        setPadding(0, DensityUtil.dip2px(15),0,DensityUtil.dip2px(15));
     }
 
     @NotNull
@@ -96,7 +98,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
 
     @Override
     public int maxOffsetHeight() {
-        return 2*getHeight();
+        return 40*getHeight();
     }
 
 

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">KRefreshLayout</string>
+    
+    
+    <string-array name="header_style">
+        <item>ClassicalHeader</item>
+        <item>MateriaHeader</item>
+        <item>RentalsSunHeader</item>
+    </string-array>
 </resources>

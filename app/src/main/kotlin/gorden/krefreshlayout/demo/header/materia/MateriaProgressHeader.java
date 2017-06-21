@@ -1,9 +1,8 @@
 package gorden.krefreshlayout.demo.header.materia;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
@@ -27,7 +26,7 @@ import gorden.refresh.KRefreshLayout;
  * Created by Gordn on 2017/6/20.
  */
 
-public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader{
+public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader {
 
     private int mCircleWidth;
     private int mCircleHeight;
@@ -50,7 +49,7 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
     private MaterialProgressDrawable mProgress;
 
     public MateriaProgressHeader(@NonNull Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public MateriaProgressHeader(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -62,8 +61,8 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
 
         setColorSchemeColors(getResources().getIntArray(R.array.refresh_color));
-
     }
+
     private void createProgressView() {
         mCircleView = new CircleImageView(getContext(), CIRCLE_BG_LIGHT, CIRCLE_DIAMETER / 2);
         mProgress = new MaterialProgressDrawable(getContext(), this);
@@ -139,12 +138,15 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
 
     @Override
     public int maxOffsetHeight() {
-        return 2*getHeight();
+        return 2 * getHeight();
     }
+
     boolean isReset = true;
+
     @Override
     public void onReset(@NotNull KRefreshLayout refreshLayout) {
         mCircleView.clearAnimation();
+        mCircleView.animate().cancel();
         mProgress.stop();
         mCircleView.setVisibility(View.GONE);
 
@@ -180,8 +182,7 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
 
     @Override
     public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
-
-        if (!refreshing&&isReset){
+        if (!refreshing && isReset) {
             if (mCircleView.getVisibility() != View.VISIBLE) {
                 mCircleView.setVisibility(View.VISIBLE);
             }

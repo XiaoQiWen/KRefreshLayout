@@ -10,11 +10,10 @@
     <gorden.refresh.KRefreshLayout
         android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
-        app:k_pincontent="true"
         android:layout_height="match_parent">
-        <gorden.krefreshlayout.demo.header.materia.MateriaProgressHeader
+        <gorden.krefreshlayout.demo.header.NullHeader
             android:layout_width="match_parent"
-            android:layout_height="80dp" />
+            android:layout_height="wrap_content" />
         <GridView
             android:id="@+id/gridView"
             android:layout_width="match_parent"

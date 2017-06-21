@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <gorden.refresh.KRefreshLayout
+        android:id="@+id/refreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+                <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="2dp" />
+                <include layout="@layout/item_sample"/>
+            </LinearLayout>
+        </ScrollView>
+    </gorden.refresh.KRefreshLayout>
+</FrameLayout>
