@@ -51,6 +51,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     //收缩动画持续时间
     private var mDurationOffset: Long = 200
 
+    private var mRefreshEnable:Boolean = true
+
     private var mScroller: OverScroller? = null
     private var mOffsetAnimator: ValueAnimator? = null
     private var mGesture: GestureDetectorCompat? = null
@@ -160,22 +162,28 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             return false
         }
 
+        if (!mRefreshEnable) return false
+
         if (mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
             return false
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
-                mIsBeingDragged = mCurrentOffset > 0
+                mIsBeingDragged = false
                 mInitialDownY = ev.y
                 mGesture?.onTouchEvent(ev)
             }
             MotionEvent.ACTION_MOVE -> {
-                if (ev.y - mInitialDownY > mTouchSlop && !mIsBeingDragged) {
+                if (!mIsBeingDragged&&ev.y - mInitialDownY > mTouchSlop){
+                    mIsBeingDragged = true
+                }
+
+                if (mCurrentOffset>0 && !mIsBeingDragged) {
                     mIsBeingDragged = true
                 }
             }
             MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_CANCEL -> mIsBeingDragged = mCurrentOffset > 0
+            MotionEvent.ACTION_CANCEL -> mIsBeingDragged = false
         }
 
         return mIsBeingDragged
@@ -202,10 +210,12 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
      */
     private inner class RefreshGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            if (mCurrentOffset == 0 && distanceY > 0 || mCurrentOffset == mHeader!!.maxOffsetHeight() && distanceY < 0)
+            Log.e(LOG_TAG,"RefreshGestureListener  ")
+            if ((mCurrentOffset == 0 && distanceY > 0) ||
+                    (mCurrentOffset == mHeader!!.maxOffsetHeight() && distanceY < 0))
                 return super.onScroll(e1, e2, distanceX, distanceY)
             var offset = -calculateOffset(distanceY.toInt())
-
+            Log.e(LOG_TAG,"RefreshGestureListener  "+offset)
             if (mCurrentOffset + offset > mHeader!!.maxOffsetHeight()) {
                 offset = mHeader!!.maxOffsetHeight() - mCurrentOffset
             } else if (mCurrentOffset + offset < 0) {
@@ -221,7 +231,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     }
 
     override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
-        return isEnabled && mHeader != null && !(mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
+        return isEnabled && mRefreshEnable && mHeader != null && !(mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
                 && nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
     }
 
@@ -229,10 +239,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         nestedScrollExecute = false
     }
 
-    private var nestedPreScrollY = 0
     override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
         nestedScrollExecute = true
-        nestedPreScrollY = dy
         if (mCurrentOffset > 0 && dy > 0) {
             val offset = if (dy > mCurrentOffset) mCurrentOffset else dy
             consumed[1] = if (dy > mCurrentOffset) dy - mCurrentOffset else dy
@@ -254,11 +262,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     override fun onNestedPreFling(target: View, velocityX: Float, velocityY: Float): Boolean {
         nestedScrollExecute = true
 
-        if (nestedPreScrollY * velocityY < 0) {
-            //莫名其妙的Bug,估计是Recyclerview存在的Bug
-            Log.e(LOG_TAG, "onNestedPreFling velocity orientation  is error  " + velocityY)
-            return true
-        }
         //如果当前偏移量大于0，则交给KrefreshLayout处理Fling事件
         if (mCurrentOffset > 0) {
             if (mRefreshing && velocityY > 0) {
@@ -458,6 +461,10 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     fun setKeepHeaderWhenRefresh(keep: Boolean) {
         mKeepHeaderWhenRefresh = keep
+    }
+
+    fun setRefreshEnable(enable:Boolean){
+        mRefreshEnable = enable
     }
 
     fun setPinContent(pinContent: Boolean) {

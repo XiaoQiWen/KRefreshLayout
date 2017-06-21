@@ -1,35 +1,48 @@
 package gorden.krefreshlayout.demo.ui.fragment
 
 import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.view.ViewPager
 import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import gorden.krefreshlayout.demo.R
 import gorden.krefreshlayout.demo.header.ClassicalHeader
+import gorden.krefreshlayout.demo.util.XLog
 import gorden.refresh.KRefreshLayout
-import kotlinx.android.synthetic.main.layout_recyclerview.*
+import kotlinx.android.synthetic.main.layout_coordinatorlayout.*
 
 /**
  * document
  * Created by Gordn on 2017/6/21.
  */
-class SampleAFragment : ISampleFragment() {
+class SampleHFragment : ISampleFragment() {
     override val mRefreshLayout: KRefreshLayout
         get() = refreshLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.layout_recyclerview,container,false)
+        return inflater.inflate(R.layout.layout_coordinatorlayout, container, false)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         refreshLayout.setHeaderView(ClassicalHeader(context))
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.addItemDecoration(DividerItemDecoration(context,DividerItemDecoration.VERTICAL))
+        recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+
+        textView.addOnLayoutChangeListener {
+            _, _, _, _, _, _, _, _, _ ->
+            if (scrolling_header.translationY==0f){
+                refreshLayout.setRefreshEnable(true)
+            }else{
+                refreshLayout.setRefreshEnable(false)
+            }
+        }
+
         recyclerView.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
             }
@@ -40,7 +53,7 @@ class SampleAFragment : ISampleFragment() {
 
             override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
 
-                return object :RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_sample,parent,false)){}
+                return object : RecyclerView.ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_sample,parent,false)){}
             }
         }
 
@@ -49,7 +62,6 @@ class SampleAFragment : ISampleFragment() {
                 refreshLayout?.refreshComplete(true)
             },refreshTime)
         }
-
     }
 
 }

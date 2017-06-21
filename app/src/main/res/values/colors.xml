@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="colorInitFloatBackground">#b0ffffff</color>
+    <color name="colorCollapsedFloatBackground">#e4e4e4</color>
 
     <array name="refresh_color">
         <item>#F2A829</item>

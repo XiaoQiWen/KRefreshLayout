@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">KRefreshLayout</string>
-    
+
+    <string name="header_scrolling_behavior">gorden.krefreshlayout.demo.widget.HeaderScrollingBehavior</string>
+    <string name="header_float_behavior">gorden.krefreshlayout.demo.widget.HeaderFloatBehavior</string>
     
     <string-array name="header_style">
         <item>ClassicalHeader</item>

@@ -41,6 +41,10 @@ class SampleActivity : AppCompatActivity() {
             1-> mFragment = SampleBFragment()
             2-> mFragment = SampleCFragment()
             3-> mFragment = SampleDFragment()
+            4-> mFragment = SampleEFragment()
+            5-> mFragment = SampleFFragment()
+            6-> mFragment = SampleGFragment()
+            7-> mFragment = SampleHFragment()
             else ->mFragment = SampleAFragment()
         }
         manager.beginTransaction().replace(R.id.frame_content,mFragment).commit()

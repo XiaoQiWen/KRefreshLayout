@@ -11,10 +11,9 @@ import gorden.krefreshlayout.demo.R
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-    val gridItems = arrayOf("RecyclerView","ScrollView","NestedScrollView","ViewPager in NestedScrollView","RecyclerView"
-            ,"RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView"
-            ,"RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView"
-            ,"RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView","RecyclerView")
+    val gridItems = arrayOf("RecyclerView","ScrollView","NestedScrollView","ViewPager in NestedScrollView","ViewPager in ScrollView"
+            ,"WebView ","Fragment in ViewPager","CoordinatorLayout","暂","时","没","有","想","到","其","它","场","景"
+            ,"您","可","以","给","我","点","建","议","gordenxqw@gmail.com\nQQ:354419188")
     val dataList = ArrayList<Map<String,String>>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
