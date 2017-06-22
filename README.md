@@ -2,7 +2,7 @@
 强大的下拉刷新库，定制任意Header。比官方SwipRefrehLayout更加强大，更加好用</br>
 支持定制任意header,需实现KRefreshHeader or JRefreshHeader。实现方式可参考demo
 ### 示例
-[DEMO下载](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/apk/demo.apk)</br>
+[DEMO下载](https://github.com/XiaoQiWen/KRefreshLayout/raw/master/apk/demo.apk)</br>
 ---
 demo截图:
 1. 一个没任何效果的header,这样实现类似于ios overscroll</br></br>
