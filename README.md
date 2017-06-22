@@ -6,15 +6,15 @@
 ---
 demo截图:
 1. 一个没任何效果的header,这样实现类似于ios overscroll</br></br>
-![](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/screenshot/gif0.gif) </br> </br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif0.gif) </br> </br>
 2.经典的下拉刷新模式</br></br>
-![](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/screenshot/gif1.gif)  </br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif1.gif)  </br></br>
 3.官方SwipeRefreshLayout样式</br></br>
-![](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/screenshot/gif2.gif)  </br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif2.gif)  </br></br>
 4.ViewPager场景Storehouse样式</br></br>
-![](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/screenshot/gif3.gif)  </br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif3.gif)  </br></br>
 5.Coordinatorlayout场景</br></br>
-![](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/screenshot/gif4.gif)  </br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif4.gif)  </br></br>
 ### 使用方式
 * xml布局中
 ```
