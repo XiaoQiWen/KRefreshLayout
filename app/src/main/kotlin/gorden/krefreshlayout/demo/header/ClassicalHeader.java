@@ -98,7 +98,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
 
     @Override
     public int maxOffsetHeight() {
-        return 40*getHeight();
+        return 4*getHeight();
     }
 
 

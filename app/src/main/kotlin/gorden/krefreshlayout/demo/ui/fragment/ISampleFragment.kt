@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment
 import android.view.ViewGroup
 import gorden.krefreshlayout.demo.header.ClassicalHeader
 import gorden.krefreshlayout.demo.header.NullHeader
+import gorden.krefreshlayout.demo.header.circle.CircleHeader
+import gorden.krefreshlayout.demo.header.fungame.FunGameHeader
 import gorden.krefreshlayout.demo.header.materia.MateriaProgressHeader
 import gorden.krefreshlayout.demo.header.rentals.RentalsSunHeaderView
 import gorden.krefreshlayout.demo.header.storehouse.StoreHouseHeader
@@ -64,6 +66,8 @@ abstract class ISampleFragment : Fragment() {
             1 -> mRefreshLayout.setHeaderView(MateriaProgressHeader(context), ViewGroup.LayoutParams.MATCH_PARENT, DensityUtil.dip2px(80))
             2 -> mRefreshLayout.setHeaderView(RentalsSunHeaderView(context))
             3 -> mRefreshLayout.setHeaderView(StoreHouseHeader(context))
+            4 -> mRefreshLayout.setHeaderView(CircleHeader(context))
+            5 -> mRefreshLayout.setHeaderView(FunGameHeader(context))
             else -> mRefreshLayout.setHeaderView(NullHeader(context))
         }
     }

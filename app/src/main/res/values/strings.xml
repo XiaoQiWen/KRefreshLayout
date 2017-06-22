@@ -9,5 +9,7 @@
         <item>MateriaHeader</item>
         <item>RentalsSunHeader</item>
         <item>StoreHouseHeader</item>
+        <item>CircleHeader</item>
+        <item>FunGameHeader</item>
     </string-array>
 </resources>
