@@ -1,1 +1,1 @@
-include ':app', ':library', ':library_java'
+include ':app', ':library', ':refresh-java'
