@@ -7,7 +7,6 @@ interface KRefreshHeader {
      * 返回headerView
      */
     fun getView(): View
-
     /**
      * 刷新成功停滞时间
      */
@@ -33,7 +32,7 @@ interface KRefreshHeader {
     fun onReset(refreshLayout: KRefreshLayout)
 
     /**
-     * 准备刷新，作初始化工作
+     * 准备下拉，作初始化工作
      */
     fun onPrepare(refreshLayout: KRefreshLayout)
 
@@ -44,6 +43,7 @@ interface KRefreshHeader {
 
     /**
      * 刷新完成
+     * @param isSuccess 成功还是失败
      */
     fun onComplete(refreshLayout: KRefreshLayout,isSuccess:Boolean)
 
