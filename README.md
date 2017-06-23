@@ -1,21 +1,40 @@
-# KRefreshLayout    and   JRefreshLayout
-强大的下拉刷新库，定制任意Header。比官方SwipRefrehLayout更加强大，更加好用</br>
-支持定制任意header,需实现KRefreshHeader or JRefreshHeader。实现方式可参考demo
-### 示例
-[DEMO下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo.apk)</br>
----
-demo截图:
-1. 一个没任何效果的header,这样实现类似于ios overscroll</br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif0.gif) </br> </br>
-2.经典的下拉刷新模式</br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif1.gif)  </br></br>
-3.官方SwipeRefreshLayout样式</br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif2.gif)  </br></br>
-4.ViewPager场景Storehouse样式</br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif3.gif)  </br></br>
-5.Coordinatorlayout场景</br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif4.gif)  </br></br>
-### 使用方式
+# KRefreshLayout (JRefreshLayout)
+[![Version](https://img.shields.io/badge/release-1.1-green.svg)](https://github.com/XiaoQiWen/KRefreshLayout/releases)</br>
+kotlin和java两个版本的下拉刷新框架,支持任意View、支持定制任意header
+## Download
+Gradle
+```
+compile 'gorden.refresh:refresh-java:1.1' //java版本
+compile 'gorden.refresh:refresh-kotlin:1.1' //kotlin
+```
+or Maven
+```
+//java版本
+<dependency>
+  <groupId>gorden.refresh</groupId>
+  <artifactId>refresh-java</artifactId>
+  <version>1.1</version>
+  <type>pom</type>
+</dependency>
+
+//kotlin版本
+<dependency>
+  <groupId>gorden.refresh</groupId>
+  <artifactId>refresh-kotlin</artifactId>
+  <version>1.1</version>
+  <type>pom</type>
+</dependency>
+```
+## example
+[DEMO下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo.apk)</br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif0.gif)
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif1.gif)
+</br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif2.gif)
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif3.gif)
+</br></br>
+![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif4.gif)
+## Usage
 * xml布局中
 ```
 <gorden.refresh.KRefreshLayout
