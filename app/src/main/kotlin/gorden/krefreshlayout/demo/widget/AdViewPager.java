@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.bumptech.glide.Glide;
+//import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -316,7 +316,7 @@ public class AdViewPager extends RelativeLayout {
             });
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             if (mIsImageUrl) {
-                Glide.with(getContext()).load(mImageUrls.get(toRealPosition(position))).asBitmap().into(imageView);
+//                Glide.with(getContext()).load(mImageUrls.get(toRealPosition(position))).asBitmap().into(imageView);
             } else {
                 imageView.setImageResource(mImages.get(toRealPosition(position)));
             }
