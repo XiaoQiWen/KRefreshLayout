@@ -25,6 +25,17 @@ or Maven
   <type>pom</type>
 </dependency>
 ```
+如果使用Kotlin版本还需下载kotlin插件</br>
+project build.gradle 
+```classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"```</br>
+app build.gradle
+```
+apply plugin: 'kotlin-android'
+
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+}
+```
 ## example
 [DEMO下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo.apk)</br></br>
 ![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif0.gif)
@@ -35,7 +46,6 @@ or Maven
 </br></br>
 ![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif4.gif)
 ## Usage
-* xml布局中
 ```
 <gorden.refresh.KRefreshLayout
       android:id="@+id/refreshLayout"
@@ -53,22 +63,19 @@ or Maven
           android:horizontalSpacing="5dp"
           />
 </gorden.refresh.KRefreshLayout>
-
 ```
-或者这样
+or
 ```
 <gorden.refresh.KRefreshLayout
-      android:id="@+id/refreshLayout"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
-      <android.support.v7.widget.RecyclerView
-          android:id="@+id/recyclerView"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"/>
+    android:id="@+id/refreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </gorden.refresh.KRefreshLayout>
-```
-之后在代码中动态添加Header
-```
+
 refreshLayout.setHeaderView(ClassicalHeader(context))
 ```
 * Header实现方式</br>
