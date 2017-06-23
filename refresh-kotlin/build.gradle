@@ -10,7 +10,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
     }
     buildTypes {
         release {
@@ -21,12 +21,8 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
 }
-apply from: '../bintray.gradle'
+apply from: '../bintrayUpload.gradle'
 dependencies {
     provided 'com.android.support:appcompat-v7:25.3.1'
     provided 'com.android.support:design:25.3.1'

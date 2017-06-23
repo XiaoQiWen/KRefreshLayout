@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="gorden.jrefresh.demo.MainActivity">
+    <gorden.refresh.JRefreshLayout
+        android:id="@+id/refreshLayout"
+        android:layout_width="match_parent"
+        android:background="#2f5181"
+        android:layout_height="match_parent">
+        <gorden.jrefresh.demo.header.ClassicalHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            app:layoutManager="LinearLayoutManager"
+            android:layout_height="match_parent"/>
+    </gorden.refresh.JRefreshLayout>
+
+</FrameLayout>

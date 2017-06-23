@@ -1,13 +1,15 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+
     defaultConfig {
+        applicationId "gorden.jrefresh.demo"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
-        versionName '1.1'
+        versionName "1.1"
     }
     buildTypes {
         release {
@@ -15,14 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
 }
-//apply from: '../bintrayUpload.gradle'
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    provided 'com.android.support:appcompat-v7:25.3.1'
-    provided 'com.android.support:design:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile project(':refresh-java')
 }

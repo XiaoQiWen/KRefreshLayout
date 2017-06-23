@@ -1,0 +1,131 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.jetbrains.dokka-android' //TODO kotlin
+
+Properties properties = new Properties()
+File projectPropertiesFile = project.file("project.properties")
+if(projectPropertiesFile.exists()){
+    properties.load(projectPropertiesFile.newDataInputStream())
+}
+
+// read properties
+def projectName = properties.getProperty("project.name")
+def projectGroupId = properties.getProperty("project.groupId")
+def projectArtifactId = properties.getProperty("project.artifactId")
+def projectVersionName = android.defaultConfig.versionName
+def projectPackaging = properties.getProperty("project.packaging")
+def projectSiteUrl = properties.getProperty("project.siteUrl")
+def projectGitUrl = properties.getProperty("project.gitUrl")
+
+def javadocName = properties.getProperty("javadoc.name")
+
+//read local.properties
+File localPropertiesFile = project.rootProject.file("local.properties")
+if(localPropertiesFile.exists()){
+    properties.load(localPropertiesFile.newDataInputStream())
+}
+
+def developerId = properties.getProperty("developer.id")
+def developerName = properties.getProperty("developer.name")
+def developerEmail = properties.getProperty("developer.email")
+
+def bintrayUser = properties.getProperty("bintray.user")
+def bintrayApikey = properties.getProperty("bintray.apikey")
+
+group = projectGroupId
+version = projectVersionName
+
+// This generates POM.xml with proper parameters  //TODO java
+//install {
+//    repositories.mavenInstaller {
+//        pom {
+//            project {
+//                name projectName
+//                groupId projectGroupId
+//                artifactId projectArtifactId
+//                version projectVersionName
+//                packaging projectPackaging
+//                url projectSiteUrl
+//                licenses {
+//                    license {
+//                        name 'The Apache Software License, Version 2.0'
+//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id developerId
+//                        name developerName
+//                        email developerEmail
+//                    }
+//                }
+//                scm {
+//                    connection projectGitUrl
+//                    developerConnection projectGitUrl
+//                    url projectSiteUrl
+//                }
+//            }
+//        }
+//    }
+//}
+
+// This generates sources.jar
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+//task javadoc(type: Javadoc) { //TODO java
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//}
+
+//This generates javadoc.jar
+//task javadocJar(type: Jar, dependsOn: javadoc) {//TODO java
+//    classifier = 'javadoc'
+//    from javadoc.destinationDir
+//}
+
+dokka { //TODO kotlin
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task dokkaJavadocJar(type:Jar,dependsOn: dokka) {   //TODO kotlin
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+}
+
+artifacts {
+//    archives javadocJar //TODO java
+    archives dokkaJavadocJar    //TODO kotlin
+    archives sourcesJar
+}
+
+
+// javadoc configuration
+//javadoc { //TODO java
+//    options{
+//        encoding "UTF-8"
+//        charSet 'UTF-8'
+//        author true
+//        version projectVersionName
+//        links "http://docs.oracle.com/javase/7/docs/api"
+//        title javadocName
+//    }
+//}
+
+// bintrayJava configuration
+bintray {
+    user = bintrayUser
+    key = bintrayApikey
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = projectName
+        websiteUrl = projectSiteUrl
+        vcsUrl = projectGitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}

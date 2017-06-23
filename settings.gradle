@@ -1,1 +1,1 @@
-include ':app', ':refresh-kotlin', ':refresh-java'
+include ':app_kotlin', ':refresh-kotlin', ':refresh-java', ':app_java'
