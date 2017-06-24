@@ -369,6 +369,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             mContentView?.offsetTopAndBottom(offset)
         if (invalidate) invalidate()
         mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / mHeader!!.refreshHeight(), mRefreshing)
+        mScrollListener?.onScroll(offset,mCurrentOffset,mCurrentOffset.toFloat() / mHeader!!.refreshHeight(), mRefreshing)
 
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
             mHeader?.onReset(this)
@@ -455,6 +456,30 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     interface KRefreshListener {
         fun onRefresh(refreshLayout: KRefreshLayout)
+    }
+
+    private var mScrollListener: KScrollListener? = null
+
+    fun setKScrollListener(scrollListener: KScrollListener) {
+        mScrollListener = scrollListener
+    }
+
+    fun setKScrollListener(scrollListener: (offset: Int, distance: Int, percent: Float, refreshing: Boolean) -> Unit): Unit {
+        mScrollListener = object : KScrollListener {
+            override fun onScroll(offset: Int, distance: Int, percent: Float, refreshing: Boolean) {
+                scrollListener(offset,distance,percent,refreshing)
+            }
+        }
+    }
+
+    interface KScrollListener{
+        /**
+         * @param offset 本次的偏移量
+         * @param distance 总的偏移量
+         * @param percent 偏移比率
+         * @param refreshing 是否在刷新
+         */
+        fun onScroll(offset: Int, distance: Int, percent: Float, refreshing: Boolean)
     }
 
     fun setKeepHeaderWhenRefresh(keep: Boolean) {

@@ -28,7 +28,15 @@
         </activity>
         <activity android:name=".ui.SettingActivity">
             <intent-filter>
-                <action android:name="SettingActivity"/>
+                <action android:name="SettingActivity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.WechatActivity">
+            <intent-filter>
+                <action android:name="WechatActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

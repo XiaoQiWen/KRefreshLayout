@@ -400,7 +400,7 @@ public class JRefreshLayout extends ViewGroup {
             mContentView.offsetTopAndBottom(offset);
         if (invalidate) invalidate();
         mHeader.onScroll(this, mCurrentOffset, (float) mCurrentOffset / mHeader.refreshHeight(), mRefreshing);
-
+        if (mScrollListener!=null) mScrollListener.onScroll(offset,mCurrentOffset, (float) mCurrentOffset / mHeader.refreshHeight(), mRefreshing);
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
             mHeader.onReset(this);
             mIsReset = true;
@@ -486,6 +486,22 @@ public class JRefreshLayout extends ViewGroup {
 
     public void setPinContent(boolean pinContent) {
         mIsPinContent = pinContent;
+    }
+
+    private JScrollListener mScrollListener;
+    public void setJScrollListener(JScrollListener scrollListener){
+        mScrollListener = scrollListener;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public interface JScrollListener{
+        /**
+         * @param offset 本次的偏移量
+         * @param distance 总的偏移量
+         * @param percent 偏移比率
+         * @param refreshing 是否在刷新
+         */
+        void onScroll(int offset, int distance,float percent,boolean refreshing);
     }
 
     public void setKeepHeaderWhenRefresh(boolean keep) {

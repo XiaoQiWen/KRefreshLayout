@@ -19,4 +19,7 @@ public class DensityUtil {
     public static int appWidth(){
         return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
+    public static int appHeight(){
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
 }
