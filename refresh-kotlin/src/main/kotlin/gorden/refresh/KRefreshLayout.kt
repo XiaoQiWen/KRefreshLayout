@@ -86,8 +86,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             }
             mContentView = getChildAt(1)
         }
-        if (mIsPinContent && mHeader != null)
-            mHeader!!.getView().bringToFront()
+        mHeader?.getView()?.bringToFront()
     }
 
     override fun generateDefaultLayoutParams(): LayoutParams {
@@ -468,14 +467,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     }
 
     fun setPinContent(pinContent: Boolean) {
-        if (mIsPinContent != pinContent) {
-            mIsPinContent = pinContent
-            if (mIsPinContent) {
-                mHeader?.getView()?.bringToFront()
-            } else {
-                mContentView?.bringToFront()
-            }
-        }
+        mIsPinContent = pinContent
     }
 
     fun setDurationOffset(duration: Long) {
@@ -499,9 +491,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         }
         mHeader = headerView
         addView(mHeader?.getView(), 0, params)
-        if (mIsPinContent) {
-            mHeader!!.getView().bringToFront()
-        }
+        mHeader?.getView()?.bringToFront()
     }
 
     /**

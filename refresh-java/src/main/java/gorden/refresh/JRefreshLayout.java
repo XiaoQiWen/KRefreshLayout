@@ -97,7 +97,7 @@ public class JRefreshLayout extends ViewGroup {
             mContentView = getChildAt(1);
         }
 
-        if (mIsPinContent && mHeader != null)
+        if (mHeader != null)
             mHeader.getView().bringToFront();
         super.onFinishInflate();
     }
@@ -484,14 +484,7 @@ public class JRefreshLayout extends ViewGroup {
     }
 
     public void setPinContent(boolean pinContent) {
-        if (mIsPinContent != pinContent) {
-            mIsPinContent = pinContent;
-            if (mIsPinContent && mHeader != null) {
-                mHeader.getView().bringToFront();
-            } else if (!mIsPinContent && mContentView != null) {
-                mContentView.bringToFront();
-            }
-        }
+        mIsPinContent = pinContent;
     }
 
     public void setKeepHeaderWhenRefresh(boolean keep) {
@@ -523,9 +516,7 @@ public class JRefreshLayout extends ViewGroup {
         }
         mHeader = headerView;
         addView(mHeader.getView(), 0, params);
-        if (mIsPinContent) {
-            mHeader.getView().bringToFront();
-        }
+        mHeader.getView().bringToFront();
     }
 
     /**
