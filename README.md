@@ -15,8 +15,7 @@ maven
   <type>pom</type>
 </dependency>
 ```
-注意:kotlin版本目前需要下载插件或者使用AndroidStudio3.0+
----
+``注意:kotlin版本目前需要下载插件或者使用AndroidStudio3.0+``</br>
 * JRefreshLayout</br>
 gradle
 ```
