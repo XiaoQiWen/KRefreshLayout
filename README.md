@@ -32,13 +32,14 @@ maven
 ```
 ## example
 [DEMO下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo.apk)</br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif0.gif)
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif1.gif)
+![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif0.gif)
+![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif1.gif)
 </br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif2.gif)
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif3.gif)
+![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif2.gif)
+![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif3.gif)
 </br></br>
-![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif4.gif)
+![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif4.gif)
+![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif5.gif)
 ## Usage
 ``KRefreshLayou详细使用说明:``
 >* [RefreshHeader接口说明](https://github.com/XiaoQiWen/KRefreshLayout/wiki/RefreshHeader%E6%96%B9%E6%B3%95%E8%AF%B4%E6%98%8E)
