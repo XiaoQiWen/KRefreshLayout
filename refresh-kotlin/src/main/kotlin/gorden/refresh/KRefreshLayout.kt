@@ -36,13 +36,12 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     private var mIsBeingDragged = true
     /* 是否处于Fling状态 */
     private var mIsFling = false
-    /* 最大Fling值 */
-    private var mFlingMaxHeight = 0
 
     private var nestedScrollExecute = false
     private val MAX_OFFSET = 30//单次最大偏移量
     private var mInitialDownY: Float = 0f
     private var mTouchSlop: Int = 0
+    private var mFlingSlop: Int = 2000
 
     //下拉刷新过程是否钉住contentView
     private var mIsPinContent = false
@@ -144,6 +143,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             MotionEvent.ACTION_DOWN -> {
                 cancelAnimator()
                 mIsFling = false
+                mLastFlingY = 0
             }
             MotionEvent.ACTION_UP,
             MotionEvent.ACTION_CANCEL -> {
@@ -263,10 +263,11 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
         //如果当前偏移量大于0，则交给KrefreshLayout处理Fling事件
         if (mCurrentOffset > 0) {
-            if (mRefreshing && velocityY > 0) {
-                mLastFlingY = 0
+            if (velocityY<0&&(!mRefreshing||!mKeepHeaderWhenRefresh||mCurrentOffset>=mHeader!!.refreshHeight())){
+                return true
+            }
+            if (Math.abs(velocityY)>mFlingSlop){
                 mIsFling = true
-                mFlingMaxHeight = mHeader!!.maxOffsetHeight()
                 mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
                 invalidate()
             }
@@ -277,10 +278,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     override fun onNestedFling(target: View, velocityX: Float, velocityY: Float, consumed: Boolean): Boolean {
         //如果向上滚动，且处于刷新过程中，监听Fling过程
-        if (mRefreshing && velocityY < 0 && mKeepHeaderWhenRefresh) {
-            mLastFlingY = 0
+        if (mRefreshing && velocityY < -mFlingSlop && mKeepHeaderWhenRefresh) {
             mIsFling = true
-            mFlingMaxHeight = mHeader!!.refreshHeight()
             mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
             invalidate()
         }
@@ -299,6 +298,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (mScroller!!.computeScrollOffset() && mIsFling) {
             //本次Fling移动距离(<0向下滚动、>0向上滚动)
             var offset = mLastFlingY - mScroller!!.currY
+            val mFlingMaxHeight = if (offset>0) mHeader!!.refreshHeight() else mHeader!!.maxOffsetHeight()
             //记录上次Fling的Y值
             mLastFlingY = mScroller!!.currY
 
@@ -318,8 +318,8 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             }
             invalidate()
         } else if (mIsFling) {
-            mIsFling = false
             Log.d(LOG_TAG, "mScroll fling complete mCurrentOffset is " + mCurrentOffset)
+            mIsFling = false
             if (mCurrentOffset > 0)
                 finishSpinner()
         }
@@ -392,7 +392,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         val value = animation.animatedValue as Int
         moveView(value - mCurrentOffset)
     }
-
 
     /**
      * 结束下拉

@@ -23,7 +23,7 @@ import android.widget.OverScroller;
  * version 1.1
  */
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class JRefreshLayout extends ViewGroup {
     private static final String LOG_TAG = "LOG_JRefreshLayout";
 
@@ -37,7 +37,6 @@ public class JRefreshLayout extends ViewGroup {
     private boolean mIsReset = true;//刷新完成后是否重置
     private boolean mIsBeingDragged = true;
     private boolean mIsFling = false;
-    private int mFlingMaxHeight = 0;
 
     /**
      * nestedScroll 是否执行
@@ -48,6 +47,7 @@ public class JRefreshLayout extends ViewGroup {
     private long mDurationOffset = 200;
     private float mInitialDownY;
     private int mTouchSlop;
+    private final int mFlingSlop = 2000;
 
     //下拉刷新过程是否钉住contentView
     private boolean mIsPinContent = false;
@@ -175,6 +175,7 @@ public class JRefreshLayout extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 cancelAnimator();
                 mIsFling = false;
+                mLastFlingY = 0;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -298,10 +299,11 @@ public class JRefreshLayout extends ViewGroup {
         nestedScrollExecute = true;
         //如果当前偏移量大于0，则交给KrefreshLayout处理Fling事件
         if (mCurrentOffset > 0) {
-            if (mRefreshing && velocityY > 0) {
-                mLastFlingY = 0;
+            if (velocityY<0&&(!mRefreshing||!mKeepHeaderWhenRefresh||mCurrentOffset>=mHeader.refreshHeight())){
+                return true;
+            }
+            if (Math.abs(velocityY)>mFlingSlop){
                 mIsFling = true;
-                mFlingMaxHeight = mHeader.maxOffsetHeight();
                 mScroller.fling(0, 0, (int) velocityX, (int) velocityY, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 invalidate();
             }
@@ -313,10 +315,8 @@ public class JRefreshLayout extends ViewGroup {
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         //如果向上滚动，且处于刷新过程中，监听Fling过程
-        if (mRefreshing && velocityY < 0 && mKeepHeaderWhenRefresh) {
-            mLastFlingY = 0;
+        if (mRefreshing && velocityY < -mTouchSlop && mKeepHeaderWhenRefresh) {
             mIsFling = true;
-            mFlingMaxHeight = mHeader.refreshHeight();
             mScroller.fling(0, 0, (int) velocityX, (int) velocityY, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
             invalidate();
         }
@@ -336,6 +336,7 @@ public class JRefreshLayout extends ViewGroup {
         if (mScroller.computeScrollOffset() && mIsFling) {
             //本次Fling移动距离(<0向下滚动、>0向上滚动)
             int offset = mLastFlingY - mScroller.getCurrY();
+            int mFlingMaxHeight = offset>0?mHeader.refreshHeight():mHeader.maxOffsetHeight();
             //记录上次Fling的Y值
             mLastFlingY = mScroller.getCurrY();
 
