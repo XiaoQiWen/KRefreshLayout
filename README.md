@@ -15,7 +15,7 @@ maven
   <type>pom</type>
 </dependency>
 ```
-`注意kotlin版本目前需要下载插件或者使用AndroidStudio3.0+`
+注意:kotlin版本目前需要下载插件或者使用AndroidStudio3.0+
 ---
 * JRefreshLayout</br>
 gradle
@@ -42,17 +42,17 @@ maven
 ![](https://github.com/XiaoQiWen/IMG/raw/master/KRefreshLayout/gif4.gif)
 ## Usage
 ``KRefreshLayou详细使用说明:``
->* [RefreshHeader接口说明](/wiki/RefreshHeader方法说明)
->* [RefreshLayout开放Api](/wiki/RefreshLayout开放Api)
->* [XML参数配置](/wiki/RefreshHeader-XML可配置参数)
+>* [RefreshHeader接口说明](https://github.com/XiaoQiWen/KRefreshLayout/wiki/RefreshHeader%E6%96%B9%E6%B3%95%E8%AF%B4%E6%98%8E)
+>* [RefreshLayout开放Api](https://github.com/XiaoQiWen/KRefreshLayout/wiki/RefreshLayout%E5%BC%80%E6%94%BEApi)
+>* [XML参数配置](https://github.com/XiaoQiWen/KRefreshLayout/wiki/RefreshHeader-XML%E5%8F%AF%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0)
 
 设置刷新监听
 ```
 refreshLayout.setKRefreshListener {
-        refreshLayout.postDelayed({
-        //这里的true是指刷新成功，在header接口中complete能接收到这参数
-        refreshLayout.refreshComplete(true)
-        }, 2000)
+    refreshLayout.postDelayed({
+    //这里的true是指刷新成功，在header接口中complete能接收到这参数
+    refreshLayout.refreshComplete(true)
+    }, 2000)
 }
 ```
 ### 联系方式
