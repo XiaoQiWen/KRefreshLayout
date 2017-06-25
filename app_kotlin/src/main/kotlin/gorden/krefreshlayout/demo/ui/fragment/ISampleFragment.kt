@@ -32,7 +32,7 @@ abstract class ISampleFragment : Fragment() {
         set(value) {
             if (field != value) {
                 field = value
-                mRefreshLayout.setPinContent(field)
+                mRefreshLayout.pinContent = field
             }
         }
 
@@ -41,7 +41,7 @@ abstract class ISampleFragment : Fragment() {
         set(value) {
             if (field != value) {
                 field = value
-                mRefreshLayout.setKeepHeaderWhenRefresh(field)
+                mRefreshLayout.keepHeaderWhenRefresh = field
             }
         }
 
@@ -50,7 +50,7 @@ abstract class ISampleFragment : Fragment() {
         set(value) {
             if (field != value) {
                 field = value
-                mRefreshLayout.setDurationOffset(field)
+                mRefreshLayout.durationOffset=field
             }
         }
 

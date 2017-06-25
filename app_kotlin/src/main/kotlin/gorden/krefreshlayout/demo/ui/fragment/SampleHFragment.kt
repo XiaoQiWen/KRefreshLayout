@@ -1,18 +1,13 @@
 package gorden.krefreshlayout.demo.ui.fragment
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.ViewPager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import gorden.krefreshlayout.demo.R
 import gorden.krefreshlayout.demo.header.ClassicalHeader
-import gorden.krefreshlayout.demo.util.XLog
 import gorden.refresh.KRefreshLayout
 import kotlinx.android.synthetic.main.layout_coordinatorlayout.*
 
@@ -36,11 +31,7 @@ class SampleHFragment : ISampleFragment() {
 
         textView.addOnLayoutChangeListener {
             _, _, _, _, _, _, _, _, _ ->
-            if (scrolling_header.translationY==0f){
-                refreshLayout.setRefreshEnable(true)
-            }else{
-                refreshLayout.setRefreshEnable(false)
-            }
+            refreshLayout.refreshEnable = scrolling_header.translationY==0f
         }
 
         recyclerView.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
