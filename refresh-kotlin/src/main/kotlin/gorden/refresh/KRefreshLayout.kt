@@ -47,18 +47,18 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     /*状态参数↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑*/
 
     /*可配置参数↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓*/
-    var maxOffset:Int = Int.MAX_VALUE                       //最大拖动高度,如果绑定Header以Header的值为准,并且设置值不会生效
+    var maxOffset:Int = 0                                   //最大拖动高度,如果绑定Header以Header的值为准,并且设置值不会生效
         set(value) {
             field = mHeader?.maxOffsetHeight()?:value
         }
-    var refreshHeight:Int = Int.MAX_VALUE                   //触发刷新的高度,如果绑定Header以Header的值为准,并且设置值不会生效
+    var refreshHeight:Int = 0                               //触发刷新的高度,如果绑定Header以Header的值为准,并且设置值不会生效
         set(value) {
             field = mHeader?.refreshHeight()?:value
         }
     var durationOffset: Long = 200                         //位移动画持续时间
     var keepHeaderWhenRefresh:Boolean = true               //刷新时Header自动移动到刷新高度,false回到初始位置
     var keepContentWhenRefresh:Boolean = true              //刷新时Content自动移动到刷新高度,false回到初始位置
-    var pinContent:Boolean = false                       //下拉刷新过程是否让ContentView不发生位置移动
+    var pinContent:Boolean = false                         //下拉刷新过程是否让ContentView不发生位置移动
     var refreshEnable:Boolean = true                       //是否允许下拉刷新
     var touchSlop: Int = 0                                 //触发移动事件的最短距离
     var flingSlop: Int = 1000                              //触发Fling事件的最低速度
@@ -77,9 +77,11 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
 
         val a = context.obtainStyledAttributes(attrs, R.styleable.KRefreshLayout)
-        pinContent = a.getBoolean(R.styleable.KRefreshLayout_k_pincontent, false)
-        keepHeaderWhenRefresh = a.getBoolean(R.styleable.KRefreshLayout_k_keepheader, true)
-        durationOffset = a.getInt(R.styleable.KRefreshLayout_k_durationoffset, 200).toLong()
+        pinContent = a.getBoolean(R.styleable.KRefreshLayout_k_pin_content, false)
+        keepHeaderWhenRefresh = a.getBoolean(R.styleable.KRefreshLayout_k_keep_header, true)
+        durationOffset = a.getInt(R.styleable.KRefreshLayout_k_duration_offset, 200).toLong()
+        refreshHeight = a.getInt(R.styleable.KRefreshLayout_k_refresh_height, refreshHeight)
+        maxOffset = a.getInt(R.styleable.KRefreshLayout_k_max_offset, maxOffset)
         a.recycle()
     }
 
@@ -90,14 +92,12 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         } else if (childCount == 1) {
             mContentView = getChildAt(0)
         } else if (childCount == 2) {
-            val child0 = getChildAt(0)
-            if (child0 is KRefreshHeader) {
-                mHeaderView = child0
-                mHeader = mHeaderView as KRefreshHeader
-                refreshHeight = mHeader!!.refreshHeight()
-                maxOffset = mHeader!!.maxOffsetHeight()
-            }
             mContentView = getChildAt(1)
+            mHeader = getChildAt(0) as? KRefreshHeader ?: return
+            mHeaderView = getChildAt(0)
+            refreshHeight = mHeader!!.refreshHeight()
+            maxOffset = mHeader!!.maxOffsetHeight()
+            refreshHeight = mHeader?.refreshHeight()?:0
         }
         mHeaderView?.bringToFront()
     }

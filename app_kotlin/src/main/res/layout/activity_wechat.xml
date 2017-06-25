@@ -39,7 +39,7 @@
             android:id="@+id/refreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:k_keepheader="false"
+            app:k_keep_header="false"
             >
             <gorden.krefreshlayout.demo.header.WechatNullHeader
                 android:layout_width="match_parent"
