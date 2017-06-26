@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.SimpleAdapter
 import gorden.krefreshlayout.demo.R
+import gorden.krefreshlayout.demo.util.XLog
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         refreshLayout.setKRefreshListener {
+            XLog.e("xxx","开始刷新")
             refreshLayout.postDelayed({
                 refreshLayout.refreshComplete(true)
             }, 2000)

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="KRefreshLayout">
-        <attr name="k_pin_content" format="boolean"/>
-        <attr name="k_keep_header" format="boolean"/>
-        <attr name="k_duration_offset" format="integer"/>
-        <attr name="k_refresh_height" format="integer"/>
-        <attr name="k_max_offset" format="integer"/>
+        <attr name="k_pin_content" format="boolean" />
+        <attr name="k_keep_header" format="boolean" />
+        <attr name="k_refresh_enable" format="boolean" />
+        <attr name="k_duration_offset" format="integer" />
+        <attr name="k_def_refresh_height" format="dimension"/>
+        <attr name="k_def_max_offset" format="dimension|enum">
+            <enum name="match_parent" value="-1" />
+        </attr>
     </declare-styleable>
 </resources>
