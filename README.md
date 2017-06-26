@@ -1,17 +1,17 @@
 # KRefreshLayout (JRefreshLayout)
 kotlin和java两个版本的下拉刷新框架,支持任意View、支持定制任意header
-## Download[![Version](https://img.shields.io/badge/release-1.1-green.svg)](https://github.com/XiaoQiWen/KRefreshLayout/releases)
+## Download[![Version](https://img.shields.io/badge/release-1.2-green.svg)](https://github.com/XiaoQiWen/KRefreshLayout/releases)
 #### KRefreshLayout
 gradle
 ```
-compile 'gorden.refresh:refresh-kotlin:1.1'
+compile 'gorden.refresh:refresh-kotlin:1.2'
 ```
 maven
 ```
 <dependency>
   <groupId>gorden.refresh</groupId>
   <artifactId>refresh-kotlin</artifactId>
-  <version>1.1</version>
+  <version>1.2</version>
   <type>pom</type>
 </dependency>
 ```
@@ -19,19 +19,19 @@ maven
 #### JRefreshLayout
 gradle
 ```
-compile 'gorden.refresh:refresh-java:1.1'
+compile 'gorden.refresh:refresh-java:1.2'
 ```
 maven
 ```
 <dependency>
   <groupId>gorden.refresh</groupId>
   <artifactId>refresh-java</artifactId>
-  <version>1.1</version>
+  <version>1.2</version>
   <type>pom</type>
 </dependency
 ```
 ## example
-[DEMO下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo.apk)</br></br>
+[DEMO下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo1.2.apk)</br></br>
 ![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif0.gif)
 ![](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif1.gif)
 </br></br>
