@@ -91,11 +91,10 @@ public class CircleHeader extends FrameLayout implements KRefreshHeader {
     }
 
     @Override
-    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         if (!refreshing){
             mHeader.getLayoutParams().height = distance;
             mHeader.requestLayout();
         }
-        return 0;
     }
 }

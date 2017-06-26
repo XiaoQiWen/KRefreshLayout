@@ -138,7 +138,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
     boolean attain = false;
 
     @Override
-    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent,boolean refreshing) {
+    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent,boolean refreshing) {
         Log.e(TAG,"----------------> onScroll  "+percent);
 
         if (!refreshing&&isReset){
@@ -152,7 +152,6 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
                 textTitle.setText("下拉刷新...");
             }
         }
-        return 0;
     }
 
 

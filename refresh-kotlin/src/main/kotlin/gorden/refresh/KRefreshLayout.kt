@@ -38,7 +38,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     private var mLastFlingY: Int = 0
     private var mCurrentOffset: Int = 0
     private var mInitialDownY: Float = 0f
-    private var mHeaderOffset:Int = 0                       //Header 消耗的Offset
 
     /*状态参数↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓*/
     private var mIsReset = true                             //刷新完成后是否重置
@@ -58,6 +57,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     var refreshEnable: Boolean = true                       //是否允许下拉刷新
     var touchSlop: Int = 0                                 //触发移动事件的最短距离
     var flingSlop: Int = 1000                              //触发Fling事件的最低速度
+    var headerOffset: Int = 0                               //Header 自身消耗Offset,可处理一些特殊效果
     /*可配置参数↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑*/
 
     private var mRefreshListener: ((KRefreshLayout) -> Unit)? = null
@@ -123,7 +123,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (mHeaderView != null && !isInEditMode) {
             val lp = mHeaderView?.layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
-            val childTop = paddingTop + lp.topMargin - mHeaderView!!.measuredHeight + mCurrentOffset+mHeaderOffset
+            val childTop = paddingTop + lp.topMargin - mHeaderView!!.measuredHeight + mCurrentOffset + headerOffset
             val childRight = childLeft + mHeaderView!!.measuredWidth
             val childBottom = childTop + mHeaderView!!.measuredHeight
             mHeaderView?.layout(childLeft, childTop, childRight, childBottom)
@@ -396,12 +396,11 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (!pinContent)
             mContentView?.offsetTopAndBottom(offset)
         if (invalidate) invalidate()
-        mHeaderOffset = mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)?:0
+        mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
         mScrollListener?.invoke(offset, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
 
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
             mHeader?.onReset(this)
-            mHeaderOffset = 0
             mIsReset = true
         }
     }
@@ -503,7 +502,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mHeaderView?.bringToFront()
     }
 
-    fun removeHeader(){
+    fun removeHeader() {
         removeView(mHeaderView)
     }
 
@@ -532,7 +531,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             mRefreshing = false
             if (mCurrentOffset == 0) {
                 mIsReset = true
-                mHeaderOffset = 0
                 mHeader?.onReset(this)
             } else {
                 //停滞时间

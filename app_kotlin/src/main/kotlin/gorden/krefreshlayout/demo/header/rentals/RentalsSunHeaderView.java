@@ -109,13 +109,12 @@ public class RentalsSunHeaderView extends View implements KRefreshHeader {
 
 
     @Override
-    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         mPercent = percent;
         mDistance = distance;
         mDrawable.offsetTopAndBottom(distance);
         mDrawable.setPercent(percent);
         invalidate();
-        return 0;
     }
 
     @Override

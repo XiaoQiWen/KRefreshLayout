@@ -294,11 +294,10 @@ public class StoreHouseHeader extends View implements KRefreshHeader {
     }
 
     @Override
-    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         float currentPercent = Math.min(1f, percent);
         setProgress(currentPercent);
         invalidate();
-        return 0;
     }
 
     private class AniController implements Runnable {

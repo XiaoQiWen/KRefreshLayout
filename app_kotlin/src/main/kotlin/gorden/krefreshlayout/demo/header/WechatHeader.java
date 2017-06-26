@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 
 import gorden.krefreshlayout.demo.R;
 import gorden.krefreshlayout.demo.util.DensityUtil;
-import gorden.krefreshlayout.demo.util.XLog;
 import gorden.refresh.KRefreshHeader;
 import gorden.refresh.KRefreshLayout;
 
@@ -27,8 +26,9 @@ import gorden.refresh.KRefreshLayout;
 
 public class WechatHeader extends FrameLayout implements KRefreshHeader {
     private ImageView imgChat;
-    private RotateAnimation rotateAnimation = new RotateAnimation(0,360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+    private RotateAnimation rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
     private ValueAnimator returnAnima = new ValueAnimator();
+
     public WechatHeader(@NonNull Context context) {
         this(context, null);
     }
@@ -47,14 +47,17 @@ public class WechatHeader extends FrameLayout implements KRefreshHeader {
         rotateAnimation.setRepeatCount(Animation.INFINITE);
         rotateAnimation.setRepeatMode(Animation.RESTART);
 
-        returnAnima.setDuration(3000);
+        returnAnima.setDuration(800);
         returnAnima.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int progress = (int) animation.getAnimatedValue();
-                offsetTopAndBottom(progress-mDistance);
+                offsetTopAndBottom(progress - mDistance);
                 imgChat.setRotation(progress);
-                mDistance=progress;
+                mDistance = progress;
+                if (getParent() instanceof KRefreshLayout) {
+                    ((KRefreshLayout) getParent()).setHeaderOffset(mDistance - lastDistance);
+                }
             }
         });
     }
@@ -96,7 +99,7 @@ public class WechatHeader extends FrameLayout implements KRefreshHeader {
     @Override
     public void onComplete(@NotNull KRefreshLayout refreshLayout, boolean isSuccess) {
         imgChat.clearAnimation();
-        returnAnima.setIntValues(mDistance,0);
+        returnAnima.setIntValues(mDistance, 0);
         returnAnima.start();
     }
 
@@ -104,24 +107,24 @@ public class WechatHeader extends FrameLayout implements KRefreshHeader {
     private int lastDistance;
 
     @Override
-    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
-        imgChat.setRotation(-distance);
+    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         int offset = distance - lastDistance;
         if (returnAnima.isRunning())
             returnAnima.cancel();
         lastDistance = distance;
 
         if (!refreshing) {
-            if (percent >1) {
+            imgChat.setRotation(-distance);
+            if (percent > 1) {
                 offsetTopAndBottom(-offset);
-                if (mDistance!=refreshHeight()){
-                    offset = refreshHeight()-mDistance;
+                if (mDistance != refreshHeight()) {
+                    offset = refreshHeight() - mDistance;
                     offsetTopAndBottom(offset);
-                    mDistance+=offset;
+                    mDistance += offset;
                 }
-            }else{
-                if (mDistance+offset!=distance){
-                    offset = distance-(mDistance+offset);
+            } else {
+                if (mDistance + offset != distance) {
+                    offset = distance - (mDistance + offset);
                     offsetTopAndBottom(offset);
                 }
                 mDistance = distance;
@@ -129,6 +132,6 @@ public class WechatHeader extends FrameLayout implements KRefreshHeader {
         } else {
             offsetTopAndBottom(-offset);
         }
-        return mDistance;
+        refreshLayout.setHeaderOffset(mDistance - distance);
     }
 }

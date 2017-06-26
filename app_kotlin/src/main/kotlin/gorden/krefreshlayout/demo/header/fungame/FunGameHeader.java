@@ -145,11 +145,10 @@ public class FunGameHeader extends FrameLayout implements KRefreshHeader {
     }
 
     @Override
-    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         if (refreshing) {
             moveRacket(distance - refreshHeight());
         }
-        return 0;
     }
 
     private class MeasureListener implements ViewTreeObserver.OnGlobalLayoutListener {
