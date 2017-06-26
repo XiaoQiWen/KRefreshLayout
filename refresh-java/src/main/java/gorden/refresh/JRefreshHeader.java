@@ -1,10 +1,7 @@
 package gorden.refresh;
 
 
-import android.view.View;
-
 public interface JRefreshHeader {
-    View getView();
     /**
      * 刷新成功停滞时间
      */

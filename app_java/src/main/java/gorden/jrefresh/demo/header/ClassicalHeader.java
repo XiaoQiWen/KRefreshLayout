@@ -75,11 +75,6 @@ public class ClassicalHeader extends FrameLayout implements JRefreshHeader {
     }
 
     @Override
-    public View getView() {
-        return this;
-    }
-
-    @Override
     public long succeedRetention() {
         return 200;
     }

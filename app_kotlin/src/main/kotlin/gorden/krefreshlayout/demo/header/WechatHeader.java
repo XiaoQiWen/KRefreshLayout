@@ -103,7 +103,7 @@ public class WechatHeader extends FrameLayout implements KRefreshHeader {
         returnAnima.start();
     }
 
-    private int mDistance = 0;
+    public int mDistance = 0;
     private int lastDistance;
 
     @Override

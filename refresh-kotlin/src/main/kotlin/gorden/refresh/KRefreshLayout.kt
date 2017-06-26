@@ -458,10 +458,11 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
         cancelAnimator()
 
-        if (mCurrentOffset == target) {
+        val mTarget: Int = if (keepHeaderWhenRefresh) target else 0
+
+        if (mCurrentOffset == mTarget) {
             return
         }
-        val mTarget: Int = if (keepHeaderWhenRefresh) target else 0
 
         Log.d(LOG_TAG, "animTo $mCurrentOffset to $mTarget")
         mOffsetAnimator?.duration = durationOffset
@@ -500,6 +501,10 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mHeaderView = mHeader as? View
         addView(mHeaderView, 0, params)
         mHeaderView?.bringToFront()
+    }
+
+    fun getHeader():KRefreshHeader?{
+        return mHeader
     }
 
     fun removeHeader() {

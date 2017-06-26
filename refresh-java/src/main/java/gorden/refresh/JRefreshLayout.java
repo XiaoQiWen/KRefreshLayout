@@ -17,6 +17,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.OverScroller;
+import android.widget.ScrollView;
 
 /**
  * Universal pull down the refresh frame
@@ -27,37 +28,41 @@ import android.widget.OverScroller;
 public class JRefreshLayout extends ViewGroup {
     private static final String LOG_TAG = "LOG_JRefreshLayout";
 
-    private JRefreshHeader mHeader;
-    private View mContentView;
-
-    private int mCurrentOffset;
-    private int mLastFlingY;
-
-    private boolean mRefreshing = false;//是否处于刷新中
-    private boolean mIsReset = true;//刷新完成后是否重置
-    private boolean mIsBeingDragged = true;
-    private boolean mIsFling = false;
-
-    /**
-     * nestedScroll 是否执行
-     */
-    private boolean nestedScrollExecute = false;
-
     private static final int MAX_OFFSET = 30;//单次最大偏移量
-    private long mDurationOffset = 200;
-    private float mInitialDownY;
-    private int mTouchSlop;
-    private final int mFlingSlop = 2000;
 
-    //下拉刷新过程是否钉住contentView
-    private boolean mIsPinContent = false;
-    //刷新时保持头部
-    private boolean mKeepHeaderWhenRefresh = true;
-    private boolean mRefreshEnable = true;
+    private JRefreshHeader mHeader;
+    private View mHeaderView;
+    private View mContentView;
 
     private OverScroller mScroller;
     private ValueAnimator mOffsetAnimator;
     private GestureDetectorCompat mGesture;
+
+    private int mCurrentOffset;
+    private int mLastFlingY;
+    private float mInitialDownY;
+
+    //状态参数↓
+    private boolean mRefreshing = false;//是否处于刷新中
+    private boolean mIsReset = true;//刷新完成后是否重置
+    private boolean mIsBeingDragged = true;
+    private boolean mIsFling = false;
+    private boolean mGestureExecute = false;
+    private boolean mNestedScrollExecute = false;
+
+    //可配置参数,提供set方法
+    private int defaultRefreshHeight;
+    private int defaultMaxOffset;
+    private long mDurationOffset = 200;
+    private boolean mKeepHeaderWhenRefresh = true;
+    private boolean mIsPinContent = false;
+    private boolean mRefreshEnable = true;
+    private int mTouchSlop;
+    private int mFlingSlop = 1000;
+    private int mHeaderOffset = 0;
+
+    private JRefreshListener mRefreshListener;
+    private JScrollListener mScrollListener;
 
     public JRefreshLayout(Context context) {
         this(context, null);
@@ -75,30 +80,32 @@ public class JRefreshLayout extends ViewGroup {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop() * 2;
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.JRefreshLayout);
-        mIsPinContent = a.getBoolean(R.styleable.JRefreshLayout_j_pincontent, false);
-        mKeepHeaderWhenRefresh = a.getBoolean(R.styleable.JRefreshLayout_j_keepheader, true);
-        mDurationOffset = a.getInt(R.styleable.JRefreshLayout_j_durationoffset, 200);
+        mIsPinContent = a.getBoolean(R.styleable.JRefreshLayout_j_pin_content, false);
+        mKeepHeaderWhenRefresh = a.getBoolean(R.styleable.JRefreshLayout_j_keep_header, true);
+        mDurationOffset = a.getInt(R.styleable.JRefreshLayout_j_duration_offset, 200);
+        mRefreshEnable = a.getBoolean(R.styleable.JRefreshLayout_j_refresh_enable, true);
+        defaultRefreshHeight = a.getLayoutDimension(R.styleable.JRefreshLayout_j_def_refresh_height, Integer.MAX_VALUE);
+        defaultMaxOffset = a.getLayoutDimension(R.styleable.JRefreshLayout_j_def_max_offset, defaultMaxOffset);
         a.recycle();
     }
 
     @Override
     protected void onFinishInflate() {
         int childCount = getChildCount();
-
         if (childCount > 2)
             throw new IllegalStateException("JRefreshLayout111 can only accommodate two elements");
         else if (childCount == 1) {
             mContentView = getChildAt(0);
         } else if (childCount == 2) {
-            View a = getChildAt(0);
-            if (a instanceof JRefreshHeader) {
-                mHeader = (JRefreshHeader) a;
+            if (getChildAt(0) instanceof JRefreshHeader) {
+                mHeader = (JRefreshHeader) getChildAt(0);
+                mHeaderView = (View) mHeader;
             }
             mContentView = getChildAt(1);
         }
 
-        if (mHeader != null)
-            mHeader.getView().bringToFront();
+        if (mHeaderView != null)
+            mHeaderView.bringToFront();
         super.onFinishInflate();
     }
 
@@ -139,13 +146,13 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (mHeader != null && !isInEditMode()) {
-            LayoutParams lp = (LayoutParams) mHeader.getView().getLayoutParams();
+        if (mHeaderView != null && !isInEditMode()) {
+            LayoutParams lp = (LayoutParams) mHeaderView.getLayoutParams();
             int childLeft = getPaddingLeft() + lp.leftMargin;
-            int childTop = getPaddingTop() + lp.topMargin - mHeader.getView().getMeasuredHeight() + mCurrentOffset;
-            int childRight = childLeft + mHeader.getView().getMeasuredWidth();
-            int childBottom = childTop + mHeader.getView().getMeasuredHeight();
-            mHeader.getView().layout(childLeft, childTop, childRight, childBottom);
+            int childTop = getPaddingTop() + lp.topMargin - mHeaderView.getMeasuredHeight() + mCurrentOffset + mHeaderOffset;
+            int childRight = childLeft + mHeaderView.getMeasuredWidth();
+            int childBottom = childTop + mHeaderView.getMeasuredHeight();
+            mHeaderView.layout(childLeft, childTop, childRight, childBottom);
         }
 
         if (mContentView != null) {
@@ -180,7 +187,7 @@ public class JRefreshLayout extends ViewGroup {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 //如果NestedScroll未真正执行，则结束移动
-                if (!nestedScrollExecute && mCurrentOffset > 0) {
+                if (!mNestedScrollExecute && !mGestureExecute) {
                     finishSpinner();
                 }
                 break;
@@ -190,16 +197,16 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (!isEnabled() || nestedScrollExecute || mContentView instanceof NestedScrollingChild || canChildScrollUp() || mHeader == null)
+        if (!isEnabled() || !mRefreshEnable)
             return false;
 
-        if (!mRefreshEnable) return false;
+        if (mContentView instanceof NestedScrollingChild || canChildScrollUp())
+            return false;
 
         if (mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
             return false;
 
         int action = event.getAction();
-
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mIsBeingDragged = false;
@@ -235,26 +242,49 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!isEnabled() || mHeader == null || nestedScrollExecute || canChildScrollUp())
+        if (!isEnabled() || mNestedScrollExecute || canChildScrollUp())
             return false;
         mGesture.onTouchEvent(event);
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (!mIsFling && mGestureExecute) {
+                finishSpinner();
+            }
+            mGestureExecute = false;
+        }
         return true;
     }
 
     private class RefreshGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if ((mCurrentOffset == 0 && distanceY > 0) || mCurrentOffset == mHeader.maxOffsetHeight() && distanceY < 0)
+            mGestureExecute = true;
+            int maxOffset = mHeader == null ? defaultMaxOffset == -1 ? getHeight() : defaultMaxOffset : mHeader.maxOffsetHeight();
+            if ((mCurrentOffset == 0 && distanceY > 0) || mCurrentOffset == maxOffset && distanceY < 0)
                 return super.onScroll(e1, e2, distanceX, distanceY);
-            int offset = -calculateOffset((int) distanceY);
 
-            if (mCurrentOffset + offset > mHeader.maxOffsetHeight()) {
-                offset = mHeader.maxOffsetHeight() - mCurrentOffset;
+            int offset = -calculateOffset((int) distanceY);
+            if (mCurrentOffset + offset > maxOffset) {
+                offset = maxOffset - mCurrentOffset;
             } else if (mCurrentOffset + offset < 0) {
                 offset = -mCurrentOffset;
             }
             moveView(offset);
             return super.onScroll(e1, e2, distanceX, distanceY);
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            mGestureExecute = true;
+            int refreshHeight = mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight();
+            if (velocityY > 0 && (!mRefreshing || !mKeepHeaderWhenRefresh || mCurrentOffset >= refreshHeight)) {
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
+            if (Math.abs(velocityY) > mFlingSlop) {
+                mIsFling = true;
+                mScroller.fling(0, 0, (int) velocityX, (int) -velocityY, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                invalidate();
+            }
+            return super.onFling(e1, e2, velocityX, velocityY);
         }
     }
 
@@ -264,18 +294,18 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
-        return isEnabled() && mRefreshEnable && mHeader != null && !(mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
+        return isEnabled() && mRefreshEnable && !(mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
                 && (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
     }
 
     @Override
     public void onNestedScrollAccepted(View child, View target, int axes) {
-        nestedScrollExecute = false;
+        mNestedScrollExecute = false;
     }
 
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
-        nestedScrollExecute = true;
+        mNestedScrollExecute = true;
         if (mCurrentOffset > 0 && dy > 0) {
             int offset = dy > mCurrentOffset ? mCurrentOffset : dy;
             consumed[1] = dy > mCurrentOffset ? dy - mCurrentOffset : dy;
@@ -285,9 +315,10 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-        if (dyUnconsumed < 0 && !canChildScrollUp() && mCurrentOffset < mHeader.maxOffsetHeight()) {
-            if (mCurrentOffset - dyUnconsumed > mHeader.maxOffsetHeight()) {
-                dyUnconsumed = mCurrentOffset - mHeader.maxOffsetHeight();
+        int maxOffset = mHeader == null ? defaultMaxOffset == -1 ? getHeight() : defaultMaxOffset : mHeader.maxOffsetHeight();
+        if (dyUnconsumed < 0 && !canChildScrollUp() && mCurrentOffset < maxOffset) {
+            if (mCurrentOffset - dyUnconsumed > maxOffset) {
+                dyUnconsumed = mCurrentOffset - maxOffset;
             }
             int offset = -calculateOffset(dyUnconsumed);
             moveView(offset);
@@ -296,13 +327,14 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
-        nestedScrollExecute = true;
+        mNestedScrollExecute = true;
         //如果当前偏移量大于0，则交给KrefreshLayout处理Fling事件
         if (mCurrentOffset > 0) {
-            if (velocityY<0&&(!mRefreshing||!mKeepHeaderWhenRefresh||mCurrentOffset>=mHeader.refreshHeight())){
+            int refreshHeight = mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight();
+            if (velocityY < 0 && (!mRefreshing || !mKeepHeaderWhenRefresh || mCurrentOffset >= refreshHeight)) {
                 return true;
             }
-            if (Math.abs(velocityY)>mFlingSlop){
+            if (Math.abs(velocityY) > mFlingSlop) {
                 mIsFling = true;
                 mScroller.fling(0, 0, (int) velocityX, (int) velocityY, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 invalidate();
@@ -325,10 +357,10 @@ public class JRefreshLayout extends ViewGroup {
 
     @Override
     public void onStopNestedScroll(View child) {
-        if (!mIsFling && mCurrentOffset > 0 && nestedScrollExecute) {
+        if (!mIsFling && mNestedScrollExecute) {
             finishSpinner();
         }
-        nestedScrollExecute = false;
+        mNestedScrollExecute = false;
     }
 
     @Override
@@ -336,7 +368,9 @@ public class JRefreshLayout extends ViewGroup {
         if (mScroller.computeScrollOffset() && mIsFling) {
             //本次Fling移动距离(<0向下滚动、>0向上滚动)
             int offset = mLastFlingY - mScroller.getCurrY();
-            int mFlingMaxHeight = offset>0?mHeader.refreshHeight():mHeader.maxOffsetHeight();
+            int refreshHeight = mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight();
+            int maxOffset = mHeader == null ? defaultMaxOffset == -1 ? getHeight() : defaultMaxOffset : mHeader.maxOffsetHeight();
+            int mFlingMaxHeight = offset > 0 ? refreshHeight : maxOffset;
             //记录上次Fling的Y值
             mLastFlingY = mScroller.getCurrY();
 
@@ -351,15 +385,16 @@ public class JRefreshLayout extends ViewGroup {
                     ((RecyclerView) mContentView).fling(0, (int) mScroller.getCurrVelocity());
                 } else if (mContentView instanceof NestedScrollView) {
                     ((NestedScrollView) mContentView).fling((int) mScroller.getCurrVelocity());
+                } else if (mContentView instanceof ScrollView) {
+                    ((ScrollView) mContentView).fling((int) mScroller.getCurrVelocity());
                 }
                 mScroller.forceFinished(true);
             }
             invalidate();
         } else if (mIsFling) {
-            mIsFling = false;
             Log.d(LOG_TAG, "mScroll fling complete mCurrentOffset is " + mCurrentOffset);
-            if (mCurrentOffset > 0)
-                finishSpinner();
+            mIsFling = false;
+            finishSpinner();
         }
     }
 
@@ -368,7 +403,8 @@ public class JRefreshLayout extends ViewGroup {
      */
     private int calculateOffset(int offset) {
         //下拉阻力(0f-1f) 越小阻力越大，当前计算公式:1-mDistanceY/maxheight
-        float downResistance = offset > 0 ? 0.8f : 1f - (float) mCurrentOffset / mHeader.maxOffsetHeight();
+        int maxOffset = mHeader == null ? defaultMaxOffset == -1 ? getHeight() : defaultMaxOffset : mHeader.maxOffsetHeight();
+        float downResistance = offset > 0 ? 0.8f : 1f - (float) mCurrentOffset / maxOffset;
         if (offset > 0) {
             offset = Math.min(MAX_OFFSET, (int) Math.ceil(downResistance * offset));
         } else {
@@ -385,24 +421,26 @@ public class JRefreshLayout extends ViewGroup {
      */
     private void moveView(int offset) {
         boolean invalidate = false;
+        int refreshHeight = mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight();
         if (!mRefreshing && mCurrentOffset == 0 && offset > 0) {
-            mHeader.onPrepare(this);
-            invalidate = true;
+            if (mHeader != null) mHeader.onPrepare(this);
         }
 
-        if (mCurrentOffset > getHeight()) {
+        if (mCurrentOffset > getHeight() || mCurrentOffset == 0) {
             invalidate = true;
         }
 
         mCurrentOffset += offset;
-        mHeader.getView().offsetTopAndBottom(offset);
+        if (mHeaderView != null) mHeaderView.offsetTopAndBottom(offset);
         if (!mIsPinContent)
             mContentView.offsetTopAndBottom(offset);
         if (invalidate) invalidate();
-        mHeader.onScroll(this, mCurrentOffset, (float) mCurrentOffset / mHeader.refreshHeight(), mRefreshing);
-        if (mScrollListener!=null) mScrollListener.onScroll(offset,mCurrentOffset, (float) mCurrentOffset / mHeader.refreshHeight(), mRefreshing);
+        if (mHeader != null)
+            mHeader.onScroll(this, mCurrentOffset, (float) mCurrentOffset / refreshHeight, mRefreshing);
+        if (mScrollListener != null)
+            mScrollListener.onScroll(offset, mCurrentOffset, (float) mCurrentOffset / refreshHeight, mRefreshing);
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
-            mHeader.onReset(this);
+            if (mHeader != null) mHeader.onReset(this);
             mIsReset = true;
         }
     }
@@ -431,16 +469,18 @@ public class JRefreshLayout extends ViewGroup {
      * 结束下拉
      */
     private void finishSpinner() {
+        if (mCurrentOffset <= 0) return;
         Log.d(LOG_TAG, "finishSpinner mCurrentOffset is " + mCurrentOffset + " , mRefreshing is " + mRefreshing);
         final int target;
+        int refreshHeight = mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight();
         if (mRefreshing) {
-            target = mCurrentOffset >= mHeader.refreshHeight() / 2 ? mHeader.refreshHeight() : 0;
+            target = mCurrentOffset >= refreshHeight / 2 ? refreshHeight : 0;
         } else {
-            target = mCurrentOffset >= mHeader.refreshHeight() && mIsReset ? mHeader.refreshHeight() : 0;
-            if (mCurrentOffset >= mHeader.refreshHeight() && mIsReset) {
+            target = mCurrentOffset >= refreshHeight && mIsReset ? refreshHeight : 0;
+            if (mCurrentOffset >= refreshHeight && mIsReset) {
                 mRefreshing = true;//开始刷新
                 mIsReset = false;
-                mHeader.onRefresh(this);
+                if (mHeader != null) mHeader.onRefresh(this);
                 if (mRefreshListener != null)
                     mRefreshListener.onRefresh(this);
             }
@@ -459,9 +499,8 @@ public class JRefreshLayout extends ViewGroup {
             mOffsetAnimator.addUpdateListener(mAnimatorUpdateListener);
         }
 
-        if (mOffsetAnimator.isRunning()) {
-            mOffsetAnimator.cancel();
-        }
+        cancelAnimator();
+
         if (!mKeepHeaderWhenRefresh) target = 0;
 
         if (mCurrentOffset == target) {
@@ -473,35 +512,36 @@ public class JRefreshLayout extends ViewGroup {
         mOffsetAnimator.start();
     }
 
-    private JRefreshListener mRefreshListener;
 
     @SuppressWarnings("WeakerAccess")
     public interface JRefreshListener {
         void onRefresh(JRefreshLayout refreshLayout);
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public interface JScrollListener {
+        /**
+         * @param offset     本次的偏移量
+         * @param distance   总的偏移量
+         * @param percent    偏移比率
+         * @param refreshing 是否在刷新
+         */
+        void onScroll(int offset, int distance, float percent, boolean refreshing);
+    }
+
+
+    //开放Api
+
     public void setJRefreshListener(JRefreshListener refreshListener) {
         mRefreshListener = refreshListener;
     }
 
-    public void setPinContent(boolean pinContent) {
-        mIsPinContent = pinContent;
-    }
-
-    private JScrollListener mScrollListener;
-    public void setJScrollListener(JScrollListener scrollListener){
+    public void setJScrollListener(JScrollListener scrollListener) {
         mScrollListener = scrollListener;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public interface JScrollListener{
-        /**
-         * @param offset 本次的偏移量
-         * @param distance 总的偏移量
-         * @param percent 偏移比率
-         * @param refreshing 是否在刷新
-         */
-        void onScroll(int offset, int distance,float percent,boolean refreshing);
+    public void setPinContent(boolean pinContent) {
+        mIsPinContent = pinContent;
     }
 
     public void setKeepHeaderWhenRefresh(boolean keep) {
@@ -528,28 +568,57 @@ public class JRefreshLayout extends ViewGroup {
     }
 
     public void setHeaderView(JRefreshHeader headerView, LayoutParams params) {
-        if (mHeader != null) {
-            removeView(mHeader.getView());
-        }
+        removeHeader();
         mHeader = headerView;
-        addView(mHeader.getView(), 0, params);
-        mHeader.getView().bringToFront();
+        mHeaderView = (View) mHeader;
+        addView(mHeaderView, 0, params);
+        mHeaderView.bringToFront();
+    }
+
+    public JRefreshHeader getHeader(){
+        return mHeader;
+    }
+
+    public void removeHeader() {
+        if (mHeaderView != null) {
+            removeView(mHeaderView);
+        }
+    }
+
+    public void setTouchSlop(int mTouchSlop) {
+        this.mTouchSlop = mTouchSlop;
+    }
+
+    public void setFlingSlop(int mFlingSlop) {
+        this.mFlingSlop = mFlingSlop;
+    }
+
+    public void setHeaderOffset(int mHeaderOffset) {
+        this.mHeaderOffset = mHeaderOffset;
+    }
+
+    public void setDefaultRefreshHeight(int defaultRefreshHeight) {
+        this.defaultRefreshHeight = defaultRefreshHeight;
+    }
+
+    public void setDefaultMaxOffset(int defaultMaxOffset) {
+        this.defaultMaxOffset = defaultMaxOffset;
     }
 
     /**
      * 自动刷新
      */
     public void startRefresh() {
-        if (!mRefreshing && mHeader != null) {
+        if (!mRefreshing && mRefreshEnable) {
             mRefreshing = true;
             mIsReset = false;
-            mHeader.onRefresh(this);
+            if (mHeader != null) mHeader.onRefresh(this);
             if (mRefreshListener != null) mRefreshListener.onRefresh(this);
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mContentView.scrollTo(0, 0);
-                    animTo(mHeader.refreshHeight());
+                    animTo(mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight());
                 }
             }, 100);
         }
@@ -559,21 +628,22 @@ public class JRefreshLayout extends ViewGroup {
      * 刷新完成
      */
     public void refreshComplete(boolean isSuccess) {
-        if (mRefreshing && mHeader != null) {
-            mHeader.onComplete(this, isSuccess);
+        if (mRefreshing) {
+            if (mHeader != null) mHeader.onComplete(this, isSuccess);
+            mRefreshing = false;
+
             if (mCurrentOffset == 0) {
-                mRefreshing = false;
                 mIsReset = true;
-                mHeader.onReset(this);
+                if (mHeader != null) mHeader.onReset(this);
             } else {
-                mRefreshing = false;
                 //刷新完成停滞时间
+                long retention = mHeader == null ? 0 : isSuccess ? mHeader.succeedRetention() : mHeader.failingRetention();
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         animTo(0);
                     }
-                }, isSuccess ? mHeader.succeedRetention() : mHeader.failingRetention());
+                }, retention);
             }
         }
     }

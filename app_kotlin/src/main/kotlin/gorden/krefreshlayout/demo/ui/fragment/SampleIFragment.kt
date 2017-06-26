@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import gorden.krefreshlayout.demo.R
 import gorden.krefreshlayout.demo.header.ClassicalHeader
 import gorden.krefreshlayout.demo.header.WechatHeader
+import gorden.krefreshlayout.demo.util.DensityUtil
 import gorden.refresh.KRefreshLayout
 import kotlinx.android.synthetic.main.layout_vp_nestedscrollview.*
 
@@ -35,6 +36,10 @@ class SampleIFragment : ISampleFragment() {
             }, refreshTime)
         }
 
+        //头部自带偏移效果的header 自动刷新
+        refreshLayout.headerOffset = DensityUtil.dip2px(50)
+        (refreshLayout.getHeader() as WechatHeader).mDistance = DensityUtil.dip2px(50)
+        refreshLayout.startRefresh()
     }
 
 }
