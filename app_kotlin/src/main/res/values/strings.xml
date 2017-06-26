@@ -11,5 +11,6 @@
         <item>StoreHouseHeader</item>
         <item>CircleHeader</item>
         <item>FunGameHeader</item>
+        <item>WechatHeader</item>
     </string-array>
 </resources>

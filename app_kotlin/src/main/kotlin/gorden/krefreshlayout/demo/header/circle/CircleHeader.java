@@ -51,13 +51,6 @@ public class CircleHeader extends FrameLayout implements KRefreshHeader {
         });
         mUpTopAnimator.setDuration(200);
     }
-
-    @NotNull
-    @Override
-    public View getView() {
-        return this;
-    }
-
     @Override
     public long succeedRetention() {
         return 1000;
@@ -98,10 +91,11 @@ public class CircleHeader extends FrameLayout implements KRefreshHeader {
     }
 
     @Override
-    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         if (!refreshing){
             mHeader.getLayoutParams().height = distance;
             mHeader.requestLayout();
         }
+        return 0;
     }
 }

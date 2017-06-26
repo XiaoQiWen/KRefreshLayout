@@ -4,10 +4,6 @@ import android.view.View
 
 interface KRefreshHeader {
     /**
-     * 返回headerView
-     */
-    fun getView(): View
-    /**
      * 刷新成功停滞时间
      */
     fun succeedRetention(): Long
@@ -53,6 +49,6 @@ interface KRefreshHeader {
      * @param percent 当前移动比例  0f - max  1.0为刷新临界点
      * @param refreshing 是否处于刷新中
      */
-    fun onScroll(refreshLayout: KRefreshLayout, distance: Int, percent: Float, refreshing: Boolean)
+    fun onScroll(refreshLayout: KRefreshLayout, distance: Int, percent: Float, refreshing: Boolean):Int
 
 }

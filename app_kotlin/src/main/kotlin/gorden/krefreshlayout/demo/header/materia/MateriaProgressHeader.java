@@ -115,12 +115,6 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
         mCircleView.setImageDrawable(mProgress);
     }
 
-    @NotNull
-    @Override
-    public View getView() {
-        return this;
-    }
-
     @Override
     public long succeedRetention() {
         return 200;
@@ -181,7 +175,7 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
     }
 
     @Override
-    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         if (!refreshing && isReset) {
             if (mCircleView.getVisibility() != View.VISIBLE) {
                 mCircleView.setVisibility(View.VISIBLE);
@@ -206,5 +200,6 @@ public class MateriaProgressHeader extends FrameLayout implements KRefreshHeader
             float rotation = (-0.25f + .4f * adjustedPercent) * .5f;
             mProgress.setProgressRotation(rotation);
         }
+        return 0;
     }
 }

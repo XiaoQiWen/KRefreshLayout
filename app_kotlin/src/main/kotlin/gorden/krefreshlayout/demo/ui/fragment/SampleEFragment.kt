@@ -24,7 +24,7 @@ class SampleEFragment : ISampleFragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        refreshLayout.setHeaderView(ClassicalHeader(context))
+        refreshLayout.setHeader(ClassicalHeader(context))
         viewPager.setImages(arrayListOf<Int>(R.drawable.img_pager1, R.drawable.img_pager2, R.drawable.img_pager3))
 
         refreshLayout.setKRefreshListener {

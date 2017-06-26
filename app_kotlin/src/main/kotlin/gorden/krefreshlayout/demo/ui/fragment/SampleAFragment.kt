@@ -27,7 +27,7 @@ class SampleAFragment : ISampleFragment() {
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        refreshLayout.setHeaderView(ClassicalHeader(context))
+        refreshLayout.setHeader(ClassicalHeader(context))
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(DividerItemDecoration(context,DividerItemDecoration.VERTICAL))
         recyclerView.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

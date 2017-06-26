@@ -38,6 +38,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     private var mLastFlingY: Int = 0
     private var mCurrentOffset: Int = 0
     private var mInitialDownY: Float = 0f
+    private var mHeaderOffset:Int = 0                       //Header 消耗的Offset
 
     /*状态参数↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓*/
     private var mIsReset = true                             //刷新完成后是否重置
@@ -122,7 +123,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (mHeaderView != null && !isInEditMode) {
             val lp = mHeaderView?.layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
-            val childTop = paddingTop + lp.topMargin - mHeaderView!!.measuredHeight + mCurrentOffset
+            val childTop = paddingTop + lp.topMargin - mHeaderView!!.measuredHeight + mCurrentOffset+mHeaderOffset
             val childRight = childLeft + mHeaderView!!.measuredWidth
             val childBottom = childTop + mHeaderView!!.measuredHeight
             mHeaderView?.layout(childLeft, childTop, childRight, childBottom)
@@ -395,11 +396,12 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (!pinContent)
             mContentView?.offsetTopAndBottom(offset)
         if (invalidate) invalidate()
-        mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
+        mHeaderOffset = mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)?:0
         mScrollListener?.invoke(offset, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
 
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
             mHeader?.onReset(this)
+            mHeaderOffset = 0
             mIsReset = true
         }
     }
@@ -482,23 +484,27 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mScrollListener = scrollListener
     }
 
-    fun setHeaderView(headerView: KRefreshHeader) {
-        setHeaderView(headerView, MATCH_PARENT, WRAP_CONTENT)
+    fun setHeader(headerView: KRefreshHeader) {
+        setHeader(headerView, MATCH_PARENT, WRAP_CONTENT)
     }
 
-    fun setHeaderView(headerView: KRefreshHeader, width: Int, height: Int) {
+    fun setHeader(headerView: KRefreshHeader, width: Int, height: Int) {
         val params = generateDefaultLayoutParams()
         params.width = width
         params.height = height
-        setHeaderView(headerView, params)
+        setHeader(headerView, params)
     }
 
-    fun setHeaderView(headerView: KRefreshHeader, params: LayoutParams) {
-        removeView(mHeaderView)
+    fun setHeader(headerView: KRefreshHeader, params: LayoutParams) {
+        removeHeader()
         mHeader = headerView
         mHeaderView = mHeader as? View
         addView(mHeaderView, 0, params)
         mHeaderView?.bringToFront()
+    }
+
+    fun removeHeader(){
+        removeView(mHeaderView)
     }
 
     /**
@@ -526,6 +532,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             mRefreshing = false
             if (mCurrentOffset == 0) {
                 mIsReset = true
+                mHeaderOffset = 0
                 mHeader?.onReset(this)
             } else {
                 //停滞时间

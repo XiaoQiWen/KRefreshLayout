@@ -57,12 +57,6 @@ public class RentalsSunHeaderView extends View implements KRefreshHeader {
         mDrawable.setBounds(pl, pt, pl + right - left, pt + bottom - top);
     }
 
-    @NotNull
-    @Override
-    public View getView() {
-        return this;
-    }
-
     @Override
     public long succeedRetention() {
         return 300;
@@ -115,12 +109,13 @@ public class RentalsSunHeaderView extends View implements KRefreshHeader {
 
 
     @Override
-    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         mPercent = percent;
         mDistance = distance;
         mDrawable.offsetTopAndBottom(distance);
         mDrawable.setPercent(percent);
         invalidate();
+        return 0;
     }
 
     @Override

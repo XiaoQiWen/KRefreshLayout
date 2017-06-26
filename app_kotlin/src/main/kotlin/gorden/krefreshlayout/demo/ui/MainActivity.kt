@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     val gridItems = arrayOf("RecyclerView", "ScrollView", "NestedScrollView", "ViewPager in NestedScrollView", "ViewPager in ScrollView"
-            , "WebView ", "Fragment in ViewPager", "CoordinatorLayout", "Wechat刷新实现","gordenxqw@gmail.com", "QQ:354419188")
+            , "WebView ", "Fragment in ViewPager", "CoordinatorLayout", "Wechat_Refresh","gordenxqw@gmail.com", "QQ:354419188")
     val dataList = ArrayList<Map<String, String>>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,16 +24,10 @@ class MainActivity : AppCompatActivity() {
         gridView.adapter = SimpleAdapter(this, dataList, R.layout.item_main, arrayOf("name"), intArrayOf(R.id.textView))
 
         gridView.setOnItemClickListener { parent, view, position, id ->
-            if (position==8){
-                val intent = Intent("WechatActivity")
-                startActivity(intent)
-
-            }else{
-                val intent = Intent("SampleActivity")
-                intent.putExtra("position", position);
-                intent.putExtra("name", gridItems[position])
-                startActivity(intent)
-            }
+            val intent = Intent("SampleActivity")
+            intent.putExtra("position", position);
+            intent.putExtra("name", gridItems[position])
+            startActivity(intent)
         }
 
         refreshLayout.setKRefreshListener {

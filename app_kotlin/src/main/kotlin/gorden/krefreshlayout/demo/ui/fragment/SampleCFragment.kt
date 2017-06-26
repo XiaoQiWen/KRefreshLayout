@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import gorden.krefreshlayout.demo.R
 import gorden.krefreshlayout.demo.header.ClassicalHeader
-import gorden.krefreshlayout.demo.header.rentals.RentalsSunHeaderView
 import gorden.refresh.KRefreshLayout
 import kotlinx.android.synthetic.main.layout_nestedscrollview.*
 
@@ -25,7 +24,7 @@ class SampleCFragment : ISampleFragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        refreshLayout.setHeaderView(ClassicalHeader(context))
+        refreshLayout.setHeader(ClassicalHeader(context))
         refreshLayout.setKRefreshListener {
             refreshLayout.postDelayed({
                 refreshLayout?.refreshComplete(true)

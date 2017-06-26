@@ -249,13 +249,6 @@ public class StoreHouseHeader extends View implements KRefreshHeader {
         canvas.restoreToCount(c1);
     }
 
-
-    @NotNull
-    @Override
-    public View getView() {
-        return this;
-    }
-
     @Override
     public long succeedRetention() {
         return 200;
@@ -301,10 +294,11 @@ public class StoreHouseHeader extends View implements KRefreshHeader {
     }
 
     @Override
-    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         float currentPercent = Math.min(1f, percent);
         setProgress(currentPercent);
         invalidate();
+        return 0;
     }
 
     private class AniController implements Runnable {

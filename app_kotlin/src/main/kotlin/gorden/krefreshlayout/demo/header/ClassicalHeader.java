@@ -75,12 +75,6 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
         setPadding(0, DensityUtil.dip2px(15),0,DensityUtil.dip2px(15));
     }
 
-    @NotNull
-    @Override
-    public View getView() {
-        return this;
-    }
-
     @Override
     public long succeedRetention() {
         return 200;
@@ -144,7 +138,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
     boolean attain = false;
 
     @Override
-    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent,boolean refreshing) {
+    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent,boolean refreshing) {
         Log.e(TAG,"----------------> onScroll  "+percent);
 
         if (!refreshing&&isReset){
@@ -158,6 +152,7 @@ public class ClassicalHeader extends FrameLayout implements KRefreshHeader {
                 textTitle.setText("下拉刷新...");
             }
         }
+        return 0;
     }
 
 

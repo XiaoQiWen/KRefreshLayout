@@ -27,7 +27,7 @@ class SampleFFragment : ISampleFragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        refreshLayout.setHeaderView(ClassicalHeader(context))
+        refreshLayout.setHeader(ClassicalHeader(context))
 
         webView.loadUrl("http://www.baidu.com")
         webView.setWebViewClient(object :WebViewClient(){

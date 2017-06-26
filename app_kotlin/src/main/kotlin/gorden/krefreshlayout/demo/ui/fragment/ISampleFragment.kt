@@ -3,7 +3,7 @@ package gorden.krefreshlayout.demo.ui.fragment
 import android.support.v4.app.Fragment
 import android.view.ViewGroup
 import gorden.krefreshlayout.demo.header.ClassicalHeader
-import gorden.krefreshlayout.demo.header.NullHeader
+import gorden.krefreshlayout.demo.header.WechatHeader
 import gorden.krefreshlayout.demo.header.circle.CircleHeader
 import gorden.krefreshlayout.demo.header.fungame.FunGameHeader
 import gorden.krefreshlayout.demo.header.materia.MateriaProgressHeader
@@ -62,13 +62,14 @@ abstract class ISampleFragment : Fragment() {
 
     fun header(): Unit {
         when (headerPosition) {
-            0 -> mRefreshLayout.setHeaderView(ClassicalHeader(context))
-            1 -> mRefreshLayout.setHeaderView(MateriaProgressHeader(context), ViewGroup.LayoutParams.MATCH_PARENT, DensityUtil.dip2px(80))
-            2 -> mRefreshLayout.setHeaderView(RentalsSunHeaderView(context))
-            3 -> mRefreshLayout.setHeaderView(StoreHouseHeader(context))
-            4 -> mRefreshLayout.setHeaderView(CircleHeader(context))
-            5 -> mRefreshLayout.setHeaderView(FunGameHeader(context))
-            else -> mRefreshLayout.setHeaderView(NullHeader(context))
+            0 -> mRefreshLayout.setHeader(ClassicalHeader(context))
+            1 -> mRefreshLayout.setHeader(MateriaProgressHeader(context), ViewGroup.LayoutParams.MATCH_PARENT, DensityUtil.dip2px(80))
+            2 -> mRefreshLayout.setHeader(RentalsSunHeaderView(context))
+            3 -> mRefreshLayout.setHeader(StoreHouseHeader(context))
+            4 -> mRefreshLayout.setHeader(CircleHeader(context))
+            5 -> mRefreshLayout.setHeader(FunGameHeader(context))
+            6 -> mRefreshLayout.setHeader(WechatHeader(context))
+            else -> mRefreshLayout.removeHeader()
         }
     }
 }

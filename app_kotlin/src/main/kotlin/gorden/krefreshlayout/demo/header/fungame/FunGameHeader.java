@@ -104,12 +104,6 @@ public class FunGameHeader extends FrameLayout implements KRefreshHeader {
         addView(curtainReLayout, maskLp);
     }
 
-    @NotNull
-    @Override
-    public View getView() {
-        return this;
-    }
-
     @Override
     public long succeedRetention() {
         return 200;
@@ -151,10 +145,11 @@ public class FunGameHeader extends FrameLayout implements KRefreshHeader {
     }
 
     @Override
-    public void onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
+    public int onScroll(@NotNull KRefreshLayout refreshLayout, int distance, float percent, boolean refreshing) {
         if (refreshing) {
             moveRacket(distance - refreshHeight());
         }
+        return 0;
     }
 
     private class MeasureListener implements ViewTreeObserver.OnGlobalLayoutListener {

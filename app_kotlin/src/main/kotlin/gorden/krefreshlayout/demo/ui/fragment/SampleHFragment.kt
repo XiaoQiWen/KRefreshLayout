@@ -26,7 +26,7 @@ class SampleHFragment : ISampleFragment() {
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        refreshLayout.setHeaderView(ClassicalHeader(context))
+        refreshLayout.setHeader(ClassicalHeader(context))
         recyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         textView.addOnLayoutChangeListener {

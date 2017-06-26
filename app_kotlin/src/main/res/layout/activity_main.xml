@@ -12,9 +12,6 @@
         android:layout_width="match_parent"
         app:k_def_max_offset="match_parent"
         android:layout_height="match_parent">
-        <!--<gorden.krefreshlayout.demo.header.NullHeader-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content" />-->
         <GridView
             android:id="@+id/gridView"
             android:layout_width="match_parent"

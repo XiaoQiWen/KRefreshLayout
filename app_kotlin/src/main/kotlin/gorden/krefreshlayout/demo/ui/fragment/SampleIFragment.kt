@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import gorden.krefreshlayout.demo.R
 import gorden.krefreshlayout.demo.header.ClassicalHeader
+import gorden.krefreshlayout.demo.header.WechatHeader
 import gorden.refresh.KRefreshLayout
 import kotlinx.android.synthetic.main.layout_vp_nestedscrollview.*
 
@@ -13,7 +14,7 @@ import kotlinx.android.synthetic.main.layout_vp_nestedscrollview.*
  * document
  * Created by Gordn on 2017/6/21.
  */
-class SampleDFragment : ISampleFragment() {
+class SampleIFragment : ISampleFragment() {
 
     override val mRefreshLayout: KRefreshLayout
         get() = refreshLayout
@@ -24,7 +25,8 @@ class SampleDFragment : ISampleFragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        refreshLayout.setHeader(ClassicalHeader(context))
+        refreshLayout.setHeader(WechatHeader(context))
+        refreshLayout.keepHeaderWhenRefresh = false
         viewPager.setImages(arrayListOf<Int>(R.drawable.img_pager1, R.drawable.img_pager2, R.drawable.img_pager3))
 
         refreshLayout.setKRefreshListener {
