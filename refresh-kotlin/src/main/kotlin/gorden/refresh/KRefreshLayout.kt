@@ -30,6 +30,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     private var mHeader: KRefreshHeader? = null
     private var mContentView: View? = null
     private var mHeaderView: View? = null
+    private var mFooterView: View? = null
 
     private var mScroller: OverScroller? = null
     private var mOffsetAnimator: ValueAnimator? = null
@@ -84,14 +85,17 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        if (childCount > 2) {
-            throw IllegalStateException("KRefreshLayout111 can only accommodate two elements")
+        if (childCount > 3) {
+            throw IllegalStateException("KRefreshLayout111 can only accommodate three elements")
         } else if (childCount == 1) {
             mContentView = getChildAt(0)
-        } else if (childCount == 2) {
+        } else if (childCount >= 2) {
             mContentView = getChildAt(1)
             mHeader = getChildAt(0) as? KRefreshHeader ?: return
             mHeaderView = getChildAt(0)
+            if (childCount==3){
+                mFooterView = getChildAt(2)
+            }
         }
         mHeaderView?.bringToFront()
     }
@@ -136,6 +140,15 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             val childRight = childLeft + mContentView!!.measuredWidth
             val childBottom = childTop + mContentView!!.measuredHeight
             mContentView?.layout(childLeft, childTop, childRight, childBottom)
+        }
+
+        if (mFooterView!=null&&mContentView!=null){
+            val lp = mFooterView?.layoutParams as LayoutParams
+            val childLeft = paddingLeft + lp.leftMargin
+            val childTop = paddingTop + lp.topMargin+mContentView!!.bottom
+            val childRight = childLeft + mFooterView!!.measuredWidth
+            val childBottom = childTop + mFooterView!!.measuredHeight
+            mFooterView?.layout(childLeft, childTop, childRight, childBottom)
         }
     }
 
@@ -276,6 +289,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     override fun onNestedScroll(target: View, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) {
         var mUnconsumed: Int = dyUnconsumed
+        Log.e(LOG_TAG,"onNestedScroll  $dyConsumed   %$dyUnconsumed  <0")
         val maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
         if (dyUnconsumed < 0 && !canChildScrollUp() && mCurrentOffset < maxOffset) {
             if (mCurrentOffset - dyUnconsumed > maxOffset) {
@@ -393,8 +407,10 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
         mCurrentOffset += offset
         mHeaderView?.offsetTopAndBottom(offset)
-        if (!pinContent)
+        if (!pinContent){
             mContentView?.offsetTopAndBottom(offset)
+            mFooterView?.offsetTopAndBottom(offset)
+        }
         if (invalidate) invalidate()
         mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
         mScrollListener?.invoke(offset, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
