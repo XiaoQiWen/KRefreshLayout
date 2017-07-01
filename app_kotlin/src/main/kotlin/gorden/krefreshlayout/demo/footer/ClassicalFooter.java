@@ -78,7 +78,7 @@ public class ClassicalFooter extends FrameLayout implements KLoadMoreFooter {
 
     @Override
     public void onComplete(boolean hasMore) {
-        rotateAnimation.cancel();
+        arrawImg.clearAnimation();
         if (hasMore){
             textTitle.setText("没有更多数据");
         }else{
@@ -95,6 +95,6 @@ public class ClassicalFooter extends FrameLayout implements KLoadMoreFooter {
     @Override
     public void onLoadMore(@NotNull KRefreshLayout refreshLayout) {
         textTitle.setText("加载中...");
-        rotateAnimation.start();
+        arrawImg.startAnimation(rotateAnimation);
     }
 }

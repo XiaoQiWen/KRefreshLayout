@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import gorden.krefreshlayout.demo.R
 import gorden.krefreshlayout.demo.header.ClassicalHeader
 import gorden.refresh.KRefreshLayout
+import kotlinx.android.synthetic.main.item_sample.*
 import kotlinx.android.synthetic.main.layout_recyclerview_load.*
 
 /**
@@ -17,6 +18,7 @@ import kotlinx.android.synthetic.main.layout_recyclerview_load.*
  * Created by Gordn on 2017/6/21.
  */
 class SampleJFragment : ISampleFragment() {
+    var count = 15
     override val mRefreshLayout: KRefreshLayout
         get() = refreshLayout
 
@@ -35,7 +37,7 @@ class SampleJFragment : ISampleFragment() {
             }
 
             override fun getItemCount(): Int {
-                return 4
+                return count
             }
 
             override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
@@ -47,6 +49,14 @@ class SampleJFragment : ISampleFragment() {
         refreshLayout.setKRefreshListener {
             refreshLayout.postDelayed({
                 refreshLayout?.refreshComplete(true)
+            },refreshTime)
+        }
+
+        refreshLayout.setKLoadMoreListener {
+            refreshLayout.postDelayed({
+                count+=5
+                recyclerView.adapter.notifyDataSetChanged()
+                refreshLayout?.loadMoreComplete(true)
             },refreshTime)
         }
 

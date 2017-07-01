@@ -43,7 +43,9 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     /*状态参数↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓*/
     private var mIsReset = true                             //刷新完成后是否重置
     private var mIsFling = false                            //是否处于Fling状态
+    private var mFlingMode = 0                              //0默认，1是处理下拉刷新 2处理上拉加载
     private var mRefreshing = false                         //是否正在刷新中
+    private var mLoading = false                            //是否正在加载更多
     private var mIsBeingDragged = false                     //是否开始拖动
     private var mGestureExecute = false                    //Gesture事件是否响应
     private var mNestedScrollExecute = false                //NestedScroll事件是否响应
@@ -56,12 +58,14 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     var keepHeaderWhenRefresh: Boolean = true               //刷新时Header自动移动到刷新高度,false回到初始位置
     var pinContent: Boolean = false                         //下拉刷新过程是否让ContentView不发生位置移动
     var refreshEnable: Boolean = true                       //是否允许下拉刷新
+    var loadMoreEnable: Boolean = true                       //是否允许下拉刷新
     var touchSlop: Int = 0                                 //触发移动事件的最短距离
     var flingSlop: Int = 1000                              //触发Fling事件的最低速度
     var headerOffset: Int = 0                               //Header 自身消耗Offset,可处理一些特殊效果
     /*可配置参数↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑*/
 
     private var mRefreshListener: ((KRefreshLayout) -> Unit)? = null
+    private var mLoadMoreListener: ((KRefreshLayout) -> Unit)? = null
     private var mScrollListener: ((offset: Int, distance: Int, percent: Float, refreshing: Boolean) -> Unit)? = null
 
     constructor(context: Context) : this(context, null)
@@ -83,6 +87,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         a.recycle()
     }
 
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (childCount > 3) {
@@ -93,7 +98,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             mContentView = getChildAt(1)
             mHeader = getChildAt(0) as? KRefreshHeader ?: return
             mHeaderView = getChildAt(0)
-            if (childCount==3){
+            if (childCount == 3) {
                 mFooterView = getChildAt(2)
             }
         }
@@ -142,10 +147,10 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             mContentView?.layout(childLeft, childTop, childRight, childBottom)
         }
 
-        if (mFooterView!=null&&mContentView!=null){
+        if (mFooterView != null && mContentView != null) {
             val lp = mFooterView?.layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
-            val childTop = paddingTop + lp.topMargin+mContentView!!.bottom
+            val childTop = paddingTop + lp.topMargin + mContentView!!.bottom
             val childRight = childLeft + mFooterView!!.measuredWidth
             val childBottom = childTop + mFooterView!!.measuredHeight
             mFooterView?.layout(childLeft, childTop, childRight, childBottom)
@@ -269,59 +274,99 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         return ViewCompat.canScrollVertically(mContentView, -1)
     }
 
+    private fun canChildScrollDown(): Boolean {
+        return ViewCompat.canScrollVertically(mContentView, 1)
+    }
+
     override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
-        return isEnabled && refreshEnable && !(mRefreshing && pinContent && keepHeaderWhenRefresh)
-                && nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
+        return isEnabled && (refreshEnable || loadMoreEnable) &&
+                nestedScrollAxes and ViewCompat.SCROLL_AXIS_VERTICAL != 0
     }
 
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
         mNestedScrollExecute = false
     }
 
+    /**
+     * 仅处理已经发生偏移，且偏移在减小的情况
+     */
     override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
         mNestedScrollExecute = true
-        if (mCurrentOffset > 0 && dy > 0) {
-            val offset = if (dy > mCurrentOffset) mCurrentOffset else dy
-            consumed[1] = if (dy > mCurrentOffset) dy - mCurrentOffset else dy
-            moveView(-offset)
+
+        if (mCurrentOffset == 0 || mCurrentOffset * dy < 0)
+            return
+
+        //如果正在刷新且为此刷新模式则不处理
+        if (mRefreshing && pinContent && keepHeaderWhenRefresh)
+            return
+
+        val offset:Int
+        if (Math.abs(dy)>Math.abs(mCurrentOffset)){
+            offset = mCurrentOffset
+            consumed[1] = dy-mCurrentOffset
+        }else{
+            offset = dy
+            consumed[1] = dy
         }
+        moveView(-offset)
     }
 
     override fun onNestedScroll(target: View, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) {
-        var mUnconsumed: Int = dyUnconsumed
-        Log.e(LOG_TAG,"onNestedScroll  $dyConsumed   %$dyUnconsumed  <0")
-        val maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
-        if (dyUnconsumed < 0 && !canChildScrollUp() && mCurrentOffset < maxOffset) {
-            if (mCurrentOffset - dyUnconsumed > maxOffset) {
-                mUnconsumed = mCurrentOffset - maxOffset
-            }
-            val offset = -calculateOffset(mUnconsumed)
-            moveView(offset)
+        var maxOffset:Int = 0
+        if (dyUnconsumed<0){
+            maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
+        }else if (dyUnconsumed>0){
+            maxOffset = mFooterView?.height?:0
+        }
+        if (dyUnconsumed==0 || Math.abs(mCurrentOffset)>=maxOffset)
+            return
+
+        if (dyUnconsumed<0 &&!canChildScrollUp()&&!mLoading){//下拉
+            val offset = if (mCurrentOffset-dyUnconsumed>maxOffset) mCurrentOffset-maxOffset else dyUnconsumed
+            moveView(-calculateOffset(offset))
+        }else if (dyUnconsumed>0&&!canChildScrollDown()&&!mRefreshing&&(mContentView?.height?:0)>=height){//上拉
+            val offset = if (dyUnconsumed-mCurrentOffset>maxOffset) maxOffset+mCurrentOffset else dyUnconsumed
+            moveView(-offset)
         }
     }
 
     override fun onNestedPreFling(target: View, velocityX: Float, velocityY: Float): Boolean {
         mNestedScrollExecute = true
+        Log.e(LOG_TAG,"onNestedPreFling     $velocityY")//下正
+        //没有发生偏移，则不处理Fling事件
+        if (mCurrentOffset==0)
+            return false
 
-        //如果当前偏移量大于0，则交给KrefreshLayout处理Fling事件
-        if (mCurrentOffset > 0) {
-            val refreshHeight = mHeader?.refreshHeight() ?: defaultRefreshHeight
-            if (velocityY < 0 && (!mRefreshing || !keepHeaderWhenRefresh || mCurrentOffset >= refreshHeight)) {
+        val maxOffset:Int
+        if (mCurrentOffset>0){
+            maxOffset = mHeader?.refreshHeight() ?: defaultRefreshHeight
+            if (velocityY < 0 && (!mRefreshing || !keepHeaderWhenRefresh)) {
                 return true
             }
-            if (Math.abs(velocityY) > flingSlop) {
-                mIsFling = true
-                mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
-                invalidate()
-            }
+        }else{
+            maxOffset = mFooterView?.height?:0
+        }
+
+        if (Math.abs(mCurrentOffset)>=maxOffset){
             return true
-        } else
-            return false
+        }
+
+        if (Math.abs(velocityY) > flingSlop) {
+            mIsFling = true
+            mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
+            invalidate()
+        }
+
+        return true
     }
 
     override fun onNestedFling(target: View, velocityX: Float, velocityY: Float, consumed: Boolean): Boolean {
         //如果向上滚动，且处于刷新过程中，监听Fling过程
         if (mRefreshing && velocityY < -flingSlop && keepHeaderWhenRefresh) {
+            mIsFling = true
+            mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
+            invalidate()
+        } else if (velocityY > flingSlop&&!mRefreshing) {
             mIsFling = true
             mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
             invalidate()
@@ -340,22 +385,37 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (mScroller!!.computeScrollOffset() && mIsFling) {
             //本次Fling移动距离(<0向下滚动、>0向上滚动)
             var offset = mLastFlingY - mScroller!!.currY
-            val refreshHeight = mHeader?.refreshHeight() ?: defaultRefreshHeight
-            val maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
-            val mFlingMaxHeight = if (offset > 0) refreshHeight else maxOffset
+            Log.e(LOG_TAG, "computeScroll  $offset / $mCurrentOffset")
             //记录上次Fling的Y值
             mLastFlingY = mScroller!!.currY
 
-            if (mCurrentOffset > 0 || offset > 0 && !canChildScrollUp()) {
+            //如果在中间滚动则不处理
+            if (mCurrentOffset==0&&canChildScrollUp()&&canChildScrollDown()){
+                invalidate()
+                return
+            }
+
+            val refreshHeight = mHeader?.refreshHeight() ?: defaultRefreshHeight
+            val maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
+            val mFlingMaxHeight = if (offset > 0) refreshHeight else maxOffset
+
+            if (mCurrentOffset > 0 || (offset > 0 && !canChildScrollUp())) {
                 offset = if (mCurrentOffset + offset > mFlingMaxHeight) mFlingMaxHeight - mCurrentOffset else if (mCurrentOffset + offset < 0) -mCurrentOffset else offset
                 moveView(offset)
                 if (mCurrentOffset >= mFlingMaxHeight) {
                     mScroller?.forceFinished(true)
                 }
-            } else if (offset < 0) {
-                (mContentView as? RecyclerView)?.fling(0, mScroller!!.currVelocity.toInt())
-                (mContentView as? NestedScrollView)?.fling(mScroller!!.currVelocity.toInt())
-                (mContentView as? ScrollView)?.fling(mScroller!!.currVelocity.toInt())
+            } else if (mCurrentOffset < 0 || (offset < 0 && !canChildScrollDown())) {
+                offset = if (mCurrentOffset + offset < -(mFooterView?.height ?: 0)) -mCurrentOffset - (mFooterView?.height ?: 0) else if (mCurrentOffset + offset > 0) -mCurrentOffset else offset
+                moveView(offset)
+                if (mCurrentOffset <= -(mFooterView?.height ?: 0)) {
+                    mScroller?.forceFinished(true)
+                }
+            }else{
+                val velocity =  mScroller!!.currVelocity.toInt()*(-offset/Math.abs(offset))
+                (mContentView as? RecyclerView)?.fling(0, velocity)
+                (mContentView as? NestedScrollView)?.fling(velocity)
+                (mContentView as? ScrollView)?.fling(velocity)
                 mScroller?.forceFinished(true)
             }
             invalidate()
@@ -407,13 +467,19 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
         mCurrentOffset += offset
         mHeaderView?.offsetTopAndBottom(offset)
-        if (!pinContent){
+        if (!pinContent) {
             mContentView?.offsetTopAndBottom(offset)
             mFooterView?.offsetTopAndBottom(offset)
         }
         if (invalidate) invalidate()
         mHeader?.onScroll(this, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
         mScrollListener?.invoke(offset, mCurrentOffset, mCurrentOffset.toFloat() / refreshHeight, mRefreshing)
+
+        if (!mLoading&&mCurrentOffset<0){
+            mLoading = true
+            mLoadMoreListener?.invoke(this)
+            (mFooterView as? KLoadMoreFooter)?.onLoadMore(this)
+        }
 
         if (!mRefreshing && offset < 0 && mCurrentOffset == 0) {
             mHeader?.onReset(this)
@@ -490,6 +556,10 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mRefreshListener = refreshListener
     }
 
+    fun setKLoadMoreListener(loadMoreListener: (refreshLayout: KRefreshLayout) -> Unit): Unit {
+        mLoadMoreListener = loadMoreListener
+    }
+
     /**
      * offset(本次的偏移量)
      * distance(总的偏移量)
@@ -519,7 +589,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mHeaderView?.bringToFront()
     }
 
-    fun getHeader():KRefreshHeader?{
+    fun getHeader(): KRefreshHeader? {
         return mHeader
     }
 
@@ -561,5 +631,12 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
                 }, retention)
             }
         }
+    }
+
+    fun loadMoreComplete(hasMore:Boolean){
+        mContentView?.scrollBy(0,-mCurrentOffset)
+        moveView(-mCurrentOffset)
+        mLoading = false
+        (mFooterView as? KLoadMoreFooter)?.onComplete(hasMore)
     }
 }
