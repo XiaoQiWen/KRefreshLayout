@@ -57,6 +57,7 @@ refreshLayout.setKRefreshListener {
     }, 2000)
 }
 ```
+[关于加载更多](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/LoadMore.md)</br>
 更多请参考Demo
 ### 联系方式
 * QQ:   354419188
