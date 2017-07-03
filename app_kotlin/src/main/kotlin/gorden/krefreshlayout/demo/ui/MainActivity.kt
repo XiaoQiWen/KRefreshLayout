@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     val gridItems = arrayOf("RecyclerView", "ScrollView", "NestedScrollView", "ViewPager in NestedScrollView", "ViewPager in ScrollView"
-            , "WebView ", "Fragment in ViewPager", "CoordinatorLayout", "Wechat_Refresh","gordenxqw@gmail.com", "QQ:354419188")
+            , "WebView ", "Fragment in ViewPager", "CoordinatorLayout", "Wechat_Refresh","LoadMoreView","gordenxqw@gmail.com", "QQ:354419188")
     val dataList = ArrayList<Map<String, String>>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
