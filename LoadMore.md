@@ -2,7 +2,7 @@
 * 实现效果不友好,loadMoreView加载完成后,会有个回弹效果（个人不喜欢）
 * 加载更多的触发时机不好控制（比如滚动到内容倒数几条的时候自动加载）
 ---
-[可以参考Demo基于RecyclerView实现的加载更多](https://github.com/XiaoQiWen/KRefreshLayout/tree/master/app_kotlin/src/main/kotlin/gorden/krefreshlayout/demo/widget/recyclerview)</br></br>
+[可以参考Demo基于RecyclerView实现的加载更多](https://github.com/XiaoQiWen/KRefreshLayout/tree/master/app_kotlin/src/main/kotlin/gorden/krefreshlayout/demo/widget/recyclerview)   [LoadMoreFragment](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/app_kotlin/src/main/kotlin/gorden/krefreshlayout/demo/ui/fragment/SampleJFragment.kt)</br></br>
 ![img](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/gif6.gif)</br>
 Demo中[KLoadMoreView](https://github.com/XiaoQiWen/KRefreshLayout/blob/master/app_kotlin/src/main/kotlin/gorden/krefreshlayout/demo/widget/recyclerview/KLoadMoreView.kt)说明
 ```
