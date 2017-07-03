@@ -31,3 +31,4 @@ interface KLoadMoreView {
     fun onError(recyclerView: KRecyclerView, errorCode:Int)
 }
 ```
+[LoadMoreDemo.APK下载](https://github.com/XiaoQiWen/Resources/raw/master/KRefreshLayout/demo_new.apk)
