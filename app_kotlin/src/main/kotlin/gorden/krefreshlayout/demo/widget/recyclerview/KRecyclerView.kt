@@ -20,10 +20,16 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
     private val ITEM_TYPE_LOADMORE = 300000
 
     var hasMore: Boolean = false
+        set(value) {
+            field = value
+            if (value) showMore = true
+        }
+    var showMore:Boolean = false
     private var mLoading: Boolean = false
     var loadMoreEnable: Boolean = true
 
-    private var mWrapAdapter: WrapAdapter? = null
+    private var mWrapAdapter: WrapAdapter = WrapAdapter()
+    private var mInnerAdapter: Adapter<ViewHolder>? = null
 
     private var mLoadMoreView: KLoadMoreView? = null
     private val mHeaderViews = SparseArrayCompat<View>()
@@ -35,21 +41,20 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     override fun setAdapter(adapter: Adapter<ViewHolder>?) {
-        mWrapAdapter = WrapAdapter(adapter)
-        super.setAdapter(mWrapAdapter)
-
-        if (!(adapter?.hasObservers() ?: true)) {
-            adapter?.registerAdapterDataObserver(KDataObserver())
+        if (mInnerAdapter!=null){
+            mInnerAdapter?.unregisterAdapterDataObserver(mDataObserver)
         }
+        mInnerAdapter = adapter
+        mInnerAdapter?.registerAdapterDataObserver(mDataObserver)
+        super.setAdapter(mWrapAdapter)
     }
-
 
     /**
      * 添加HeaderView
      */
     fun addHeaderView(view: View) {
         mHeaderViews.put(mHeaderViews.size() + ITEM_TYPE_HEADER_INIT, view)
-        mWrapAdapter?.notifyDataSetChanged()
+        mWrapAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -57,7 +62,7 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
      */
     fun addFooterView(view: View) {
         mFooterViews.put(mFooterViews.size() + ITEM_TYPE_FOOTER_INIT, view)
-        mWrapAdapter?.notifyDataSetChanged()
+        mWrapAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -71,7 +76,7 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
 
         this.mLoadMoreView = loadMoreView
 
-        mWrapAdapter?.notifyDataSetChanged()
+        mWrapAdapter.notifyDataSetChanged()
 
         removeOnScrollListener(defaultScrollListener)
         if (!(mLoadMoreView?.shouldLoadMore(this) ?: true)) {
@@ -99,9 +104,9 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
         this.hasMore = hasMore
     }
 
-    fun loadMoreError(errorCode:Int){
+    fun loadMoreError(errorCode: Int) {
         mLoading = false
-        mLoadMoreView?.onError(this,errorCode)
+        mLoadMoreView?.onError(this, errorCode)
     }
 
     /**
@@ -122,19 +127,19 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
         }
     }
 
-    private inner class WrapAdapter(var adapter: Adapter<ViewHolder>?) : Adapter<ViewHolder>() {
+    private inner class WrapAdapter : Adapter<ViewHolder>() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             if (!isContent(position)) {
                 return
             }
-            adapter?.onBindViewHolder(holder, position - mHeaderViews.size())
+            mInnerAdapter?.onBindViewHolder(holder, position - mHeaderViews.size())
         }
 
         override fun getItemCount(): Int {
-            val adapterCount = adapter?.itemCount ?: 0
+            val adapterCount = mInnerAdapter?.itemCount ?: 0
 
             if (adapterCount > 0) {
-                return adapterCount + mHeaderViews.size() + mFooterViews.size() + if (mLoadMoreView == null) 0 else 1
+                return adapterCount + mHeaderViews.size() + mFooterViews.size() + if (mLoadMoreView == null||!showMore) 0 else 1
             } else {//防止没有内容的时候加载更多显示出来
                 return mHeaderViews.size() + mFooterViews.size()
             }
@@ -162,7 +167,7 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
                     }
                 }
             }
-            return adapter?.onCreateViewHolder(parent, viewType)
+            return mInnerAdapter?.onCreateViewHolder(parent, viewType)
         }
 
         override fun getItemViewType(position: Int): Int {
@@ -170,19 +175,19 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
                 return mHeaderViews.keyAt(position)
             }
 
-            if (mLoadMoreView != null && position == itemCount - 1) {
+            if (mLoadMoreView != null && position == itemCount - 1&&showMore) {
                 return ITEM_TYPE_LOADMORE
             }
 
-            if (position >= mHeaderViews.size() + (adapter?.itemCount ?: 0)) {
-                return mFooterViews.keyAt(position - mHeaderViews.size() - (adapter?.itemCount ?: 0))
+            if (position >= mHeaderViews.size() + (mInnerAdapter?.itemCount ?: 0)) {
+                return mFooterViews.keyAt(position - mHeaderViews.size() - (mInnerAdapter?.itemCount ?: 0))
             }
 
-            return adapter?.getItemViewType(position-mHeaderViews.size()) ?: -1
+            return mInnerAdapter?.getItemViewType(position - mHeaderViews.size()) ?: -1
         }
 
         override fun onAttachedToRecyclerView(recyclerView: RecyclerView?) {
-            adapter?.onAttachedToRecyclerView(recyclerView)
+            mInnerAdapter?.onAttachedToRecyclerView(recyclerView)
             val layoutManager = layoutManager
             if (layoutManager is GridLayoutManager) {
                 layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -197,7 +202,7 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
         }
 
         override fun onViewAttachedToWindow(holder: ViewHolder) {
-            adapter?.onViewAttachedToWindow(holder)
+            mInnerAdapter?.onViewAttachedToWindow(holder)
             val position = holder.layoutPosition
             val layoutParams = holder.itemView.layoutParams
             if (!isContent(position) && layoutParams != null && layoutParams is StaggeredGridLayoutManager.LayoutParams) {
@@ -210,36 +215,36 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
                 return false
             if (mLoadMoreView != null && position == itemCount - 1)
                 return false
-            if (position >= mHeaderViews.size() + (adapter?.itemCount ?: 0))
+            if (position >= mHeaderViews.size() + (mInnerAdapter?.itemCount ?: 0))
                 return false
             return true
         }
 
     }
 
-    private inner class KDataObserver : AdapterDataObserver() {
+    private val mDataObserver = object : AdapterDataObserver() {
         override fun onChanged() {
-            mWrapAdapter?.notifyDataSetChanged()
+            mWrapAdapter.notifyDataSetChanged()
         }
 
         override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
-            mWrapAdapter?.notifyItemRangeChanged(positionStart, itemCount)
+            mWrapAdapter.notifyItemRangeChanged(positionStart, itemCount)
         }
 
         override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
-            mWrapAdapter?.notifyItemRangeChanged(positionStart, itemCount, payload)
+            mWrapAdapter.notifyItemRangeChanged(positionStart, itemCount, payload)
         }
 
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            mWrapAdapter?.notifyItemRangeInserted(positionStart, itemCount)
+            mWrapAdapter.notifyItemRangeInserted(positionStart, itemCount)
         }
 
         override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-            mWrapAdapter?.notifyItemMoved(fromPosition, toPosition)
+            mWrapAdapter.notifyItemMoved(fromPosition, toPosition)
         }
 
         override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-            mWrapAdapter?.notifyItemRangeRemoved(positionStart, itemCount)
+            mWrapAdapter.notifyItemRangeRemoved(positionStart, itemCount)
         }
     }
 }
