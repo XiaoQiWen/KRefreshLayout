@@ -575,7 +575,7 @@ public class JRefreshLayout extends ViewGroup {
         mHeaderView.bringToFront();
     }
 
-    public JRefreshHeader getHeader(){
+    public JRefreshHeader getHeader() {
         return mHeader;
     }
 
@@ -610,13 +610,13 @@ public class JRefreshLayout extends ViewGroup {
      */
     public void startRefresh() {
         if (!mRefreshing && mRefreshEnable) {
-            mRefreshing = true;
-            mIsReset = false;
-            if (mHeader != null) mHeader.onRefresh(this);
-            if (mRefreshListener != null) mRefreshListener.onRefresh(this);
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    mRefreshing = true;
+                    mIsReset = false;
+                    if (mHeader != null) mHeader.onRefresh(JRefreshLayout.this);
+                    if (mRefreshListener != null) mRefreshListener.onRefresh(JRefreshLayout.this);
                     mContentView.scrollTo(0, 0);
                     animTo(mHeader == null ? defaultRefreshHeight : mHeader.refreshHeight());
                 }
@@ -631,9 +631,9 @@ public class JRefreshLayout extends ViewGroup {
         if (mRefreshing) {
             if (mHeader != null) mHeader.onComplete(this, isSuccess);
             mRefreshing = false;
-
             if (mCurrentOffset == 0) {
                 mIsReset = true;
+                cancelAnimator();
                 if (mHeader != null) mHeader.onReset(this);
             } else {
                 //刷新完成停滞时间

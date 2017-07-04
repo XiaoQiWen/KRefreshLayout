@@ -503,7 +503,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mHeaderView?.bringToFront()
     }
 
-    fun getHeader():KRefreshHeader?{
+    fun getHeader(): KRefreshHeader? {
         return mHeader
     }
 
@@ -516,11 +516,11 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
      */
     fun startRefresh() {
         if (!mRefreshing && refreshEnable) {
-            mRefreshing = true
-            mIsReset = false
-            mHeader?.onRefresh(this)
-            mRefreshListener?.invoke(this)
             postDelayed({
+                mRefreshing = true
+                mIsReset = false
+                mHeader?.onRefresh(this)
+                mRefreshListener?.invoke(this)
                 mContentView?.scrollTo(0, 0)
                 animTo(mHeader?.refreshHeight() ?: defaultRefreshHeight)
             }, 100)
@@ -536,6 +536,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             mRefreshing = false
             if (mCurrentOffset == 0) {
                 mIsReset = true
+                cancelAnimator()
                 mHeader?.onReset(this)
             } else {
                 //停滞时间
