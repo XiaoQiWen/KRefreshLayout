@@ -173,7 +173,7 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
                 return mFooterViews.keyAt(position - mHeaderViews.size() - (adapter?.itemCount ?: 0))
             }
 
-            return adapter?.getItemViewType(position) ?: -1
+            return adapter?.getItemViewType(position-mHeaderViews.size()) ?: -1
         }
 
         override fun onAttachedToRecyclerView(recyclerView: RecyclerView?) {
