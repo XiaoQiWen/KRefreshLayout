@@ -99,6 +99,11 @@ class KRecyclerView(context: Context, attrs: AttributeSet?, defStyle: Int) : Rec
         this.hasMore = hasMore
     }
 
+    fun loadMoreError(errorCode:Int){
+        mLoading = false
+        mLoadMoreView?.onError(this,errorCode)
+    }
+
     /**
      * 设置加载更多监听
      */
