@@ -31,9 +31,18 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     private var mContentView: View? = null
     private var mHeaderView: View? = null
 
-    private var mScroller: OverScroller? = null
-    private var mOffsetAnimator: ValueAnimator? = null
-    private var mGesture: GestureDetectorCompat? = null
+    private val mScroller by lazy { OverScroller(context) }
+    private val mOffsetAnimator by lazy {
+        ValueAnimator().apply {
+            addUpdateListener {
+                val value = animatedValue as Int
+                moveView(value - mCurrentOffset)
+            }
+        }
+    }
+    private val mGesture: GestureDetectorCompat by lazy {
+        GestureDetectorCompat(context, RefreshGestureListener()).apply { setIsLongpressEnabled(false) }
+    }
 
     private var mLastFlingY: Int = 0
     private var mCurrentOffset: Int = 0
@@ -67,9 +76,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     init {
-        mScroller = OverScroller(context)
-        mGesture = GestureDetectorCompat(context, RefreshGestureListener())
-        mGesture?.setIsLongpressEnabled(false)
         touchSlop = ViewConfiguration.get(context).scaledTouchSlop * 2
 
         val a = context.obtainStyledAttributes(attrs, R.styleable.KRefreshLayout)
@@ -120,29 +126,29 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        if (mHeaderView != null && !isInEditMode) {
-            val lp = mHeaderView?.layoutParams as LayoutParams
+
+        mHeaderView?.let {
+            val lp = it.layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
-            val childTop = paddingTop + lp.topMargin - mHeaderView!!.measuredHeight + mCurrentOffset + headerOffset
-            val childRight = childLeft + mHeaderView!!.measuredWidth
-            val childBottom = childTop + mHeaderView!!.measuredHeight
-            mHeaderView?.layout(childLeft, childTop, childRight, childBottom)
+            val childTop = paddingTop + lp.topMargin - it.measuredHeight + mCurrentOffset + headerOffset
+            val childRight = childLeft + it.measuredWidth
+            val childBottom = childTop + it.measuredHeight
+            it.layout(childLeft, childTop, childRight, childBottom)
         }
 
-        if (mContentView != null) {
-            val lp = mContentView?.layoutParams as LayoutParams
+        mContentView?.let {
+            val lp = it.layoutParams as LayoutParams
             val childLeft = paddingLeft + lp.leftMargin
             val childTop = paddingTop + lp.topMargin + if (pinContent) 0 else mCurrentOffset
-            val childRight = childLeft + mContentView!!.measuredWidth
-            val childBottom = childTop + mContentView!!.measuredHeight
-            mContentView?.layout(childLeft, childTop, childRight, childBottom)
+            val childRight = childLeft + it.measuredWidth
+            val childBottom = childTop + it.measuredHeight
+            it.layout(childLeft, childTop, childRight, childBottom)
         }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        (0..childCount - 1)
-                .map { getChildAt(it) }
+        (0..childCount - 1).map { getChildAt(it) }
                 .forEach { measureChildWithMargins(it, widthMeasureSpec, 0, heightMeasureSpec, 0) }
     }
 
@@ -178,7 +184,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             MotionEvent.ACTION_DOWN -> {
                 mIsBeingDragged = false
                 mInitialDownY = ev.y
-                mGesture?.onTouchEvent(ev)
+                mGesture.onTouchEvent(ev)
             }
             MotionEvent.ACTION_MOVE -> {
                 if (!mIsBeingDragged && ev.y - mInitialDownY > touchSlop) {
@@ -208,7 +214,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isEnabled || mNestedScrollExecute || canChildScrollUp())
             return false
-        mGesture?.onTouchEvent(event)
+        mGesture.onTouchEvent(event)
         if (event.action == MotionEvent.ACTION_UP) {
             if (!mIsFling && mGestureExecute) {
                 finishSpinner()
@@ -245,7 +251,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             }
             if (Math.abs(velocityY) > flingSlop) {
                 mIsFling = true
-                mScroller?.fling(0, 0, velocityX.toInt(), -velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
+                mScroller.fling(0, 0, velocityX.toInt(), -velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
                 invalidate()
             }
             return super.onFling(e1, e2, velocityX, velocityY)
@@ -297,7 +303,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             }
             if (Math.abs(velocityY) > flingSlop) {
                 mIsFling = true
-                mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
+                mScroller.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
                 invalidate()
             }
             return true
@@ -309,7 +315,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         //如果向上滚动，且处于刷新过程中，监听Fling过程
         if (mRefreshing && velocityY < -flingSlop && keepHeaderWhenRefresh) {
             mIsFling = true
-            mScroller?.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
+            mScroller.fling(0, 0, velocityX.toInt(), velocityY.toInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE)
             invalidate()
         }
         return true
@@ -323,26 +329,26 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     }
 
     override fun computeScroll() {
-        if (mScroller!!.computeScrollOffset() && mIsFling) {
+        if (mScroller.computeScrollOffset() && mIsFling) {
             //本次Fling移动距离(<0向下滚动、>0向上滚动)
-            var offset = mLastFlingY - mScroller!!.currY
+            var offset = mLastFlingY - mScroller.currY
             val refreshHeight = mHeader?.refreshHeight() ?: defaultRefreshHeight
             val maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
             val mFlingMaxHeight = if (offset > 0) refreshHeight else maxOffset
             //记录上次Fling的Y值
-            mLastFlingY = mScroller!!.currY
+            mLastFlingY = mScroller.currY
 
             if (mCurrentOffset > 0 || offset > 0 && !canChildScrollUp()) {
                 offset = if (mCurrentOffset + offset > mFlingMaxHeight) mFlingMaxHeight - mCurrentOffset else if (mCurrentOffset + offset < 0) -mCurrentOffset else offset
                 moveView(offset)
                 if (mCurrentOffset >= mFlingMaxHeight) {
-                    mScroller?.forceFinished(true)
+                    mScroller.forceFinished(true)
                 }
             } else if (offset < 0) {
-                (mContentView as? RecyclerView)?.fling(0, mScroller!!.currVelocity.toInt())
-                (mContentView as? NestedScrollView)?.fling(mScroller!!.currVelocity.toInt())
-                (mContentView as? ScrollView)?.fling(mScroller!!.currVelocity.toInt())
-                mScroller?.forceFinished(true)
+                (mContentView as? RecyclerView)?.fling(0, mScroller.currVelocity.toInt())
+                (mContentView as? NestedScrollView)?.fling(mScroller.currVelocity.toInt())
+                (mContentView as? ScrollView)?.fling(mScroller.currVelocity.toInt())
+                mScroller.forceFinished(true)
             }
             invalidate()
         } else if (mIsFling) {
@@ -409,17 +415,9 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
      * 取消offset动画
      */
     private fun cancelAnimator() {
-        if (mOffsetAnimator?.isRunning ?: false) {
-            mOffsetAnimator?.cancel()
+        if (mOffsetAnimator.isRunning) {
+            mOffsetAnimator.cancel()
         }
-    }
-
-    /**
-     * offset动画更新监听
-     */
-    private val mAnimatorUpdateListener = ValueAnimator.AnimatorUpdateListener { animation ->
-        val value = animation.animatedValue as Int
-        moveView(value - mCurrentOffset)
     }
 
     /**
@@ -451,11 +449,6 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
      * @param target 目标位置
      */
     private fun animTo(target: Int) {
-        if (mOffsetAnimator == null) {
-            mOffsetAnimator = ValueAnimator()
-            mOffsetAnimator?.addUpdateListener(mAnimatorUpdateListener)
-        }
-
         cancelAnimator()
 
         val mTarget: Int = if (keepHeaderWhenRefresh) target else 0
@@ -465,9 +458,9 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         }
 
         Log.d(LOG_TAG, "animTo $mCurrentOffset to $mTarget")
-        mOffsetAnimator?.duration = durationOffset
-        mOffsetAnimator?.setIntValues(mCurrentOffset, mTarget)
-        mOffsetAnimator?.start()
+        mOffsetAnimator.duration = durationOffset
+        mOffsetAnimator.setIntValues(mCurrentOffset, mTarget)
+        mOffsetAnimator.start()
     }
 
     fun setKRefreshListener(refreshListener: (refreshLayout: KRefreshLayout) -> Unit): Unit {
