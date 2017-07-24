@@ -3,7 +3,6 @@ package gorden.refresh
 import android.animation.ValueAnimator
 import android.content.Context
 import android.support.v4.view.GestureDetectorCompat
-import android.support.v4.view.NestedScrollingChild
 import android.support.v4.view.NestedScrollingParent
 import android.support.v4.view.ViewCompat
 import android.support.v4.widget.NestedScrollView
@@ -55,6 +54,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
     private var mIsBeingDragged = false                     //是否开始拖动
     private var mGestureExecute = false                    //Gesture事件是否响应
     private var mNestedScrollExecute = false                //NestedScroll事件是否响应
+    private var mNestedScrollInProgress = false             //NestedScroll是否可以执行，遇到部分手机不会走NestedScroll流程
     /*状态参数↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑*/
 
     /*可配置参数↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓*/
@@ -174,7 +174,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         if (!isEnabled || !refreshEnable)
             return false
 
-        if (mContentView is NestedScrollingChild || canChildScrollUp()) {
+        if (mNestedScrollInProgress || canChildScrollUp()) {
             return false
         }
         if (mRefreshing && pinContent && keepHeaderWhenRefresh)
@@ -269,6 +269,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
         mNestedScrollExecute = false
+        mNestedScrollInProgress = true
     }
 
     override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
@@ -326,6 +327,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
             finishSpinner()
         }
         mNestedScrollExecute = false
+        mNestedScrollInProgress = false
     }
 
     override fun computeScroll() {

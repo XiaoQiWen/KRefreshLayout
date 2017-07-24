@@ -49,6 +49,7 @@ public class JRefreshLayout extends ViewGroup {
     private boolean mIsFling = false;
     private boolean mGestureExecute = false;
     private boolean mNestedScrollExecute = false;
+    private boolean mNestedScrollInProgress = false;
 
     //可配置参数,提供set方法
     private int defaultRefreshHeight;
@@ -200,7 +201,7 @@ public class JRefreshLayout extends ViewGroup {
         if (!isEnabled() || !mRefreshEnable)
             return false;
 
-        if (mContentView instanceof NestedScrollingChild || canChildScrollUp())
+        if (mNestedScrollInProgress || canChildScrollUp())
             return false;
 
         if (mRefreshing && mIsPinContent && mKeepHeaderWhenRefresh)
@@ -301,6 +302,7 @@ public class JRefreshLayout extends ViewGroup {
     @Override
     public void onNestedScrollAccepted(View child, View target, int axes) {
         mNestedScrollExecute = false;
+        mNestedScrollInProgress = true;
     }
 
     @Override
@@ -361,6 +363,7 @@ public class JRefreshLayout extends ViewGroup {
             finishSpinner();
         }
         mNestedScrollExecute = false;
+        mNestedScrollInProgress = false;
     }
 
     @Override
