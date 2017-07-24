@@ -1,17 +1,17 @@
 # KRefreshLayout (JRefreshLayout)
 kotlin和java两个版本的下拉刷新框架,支持任意View、支持定制任意header
-## Download[![Version](https://img.shields.io/badge/release-1.2-green.svg)](https://github.com/XiaoQiWen/KRefreshLayout/releases)
+## Download[![Version](https://img.shields.io/badge/version-1.3-brightgreen.svg)](https://github.com/XiaoQiWen/KRefreshLayout/releases)
 #### KRefreshLayout
 gradle
 ```
-compile 'gorden.refresh:refresh-kotlin:1.2'
+compile 'gorden.refresh:refresh-kotlin:1.3'
 ```
 maven
 ```
 <dependency>
   <groupId>gorden.refresh</groupId>
   <artifactId>refresh-kotlin</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
   <type>pom</type>
 </dependency>
 ```
@@ -19,14 +19,14 @@ maven
 #### JRefreshLayout
 gradle
 ```
-compile 'gorden.refresh:refresh-java:1.2'
+compile 'gorden.refresh:refresh-java:1.3'
 ```
 maven
 ```
 <dependency>
   <groupId>gorden.refresh</groupId>
   <artifactId>refresh-java</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
   <type>pom</type>
 </dependency
 ```
