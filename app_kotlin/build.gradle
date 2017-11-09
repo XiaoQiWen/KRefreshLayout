@@ -3,12 +3,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.1"
     defaultConfig {
         applicationId "gorden.krefreshlayout.demo"
         minSdkVersion 15
-        targetSdkVersion 25
         versionCode 1
         versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -32,8 +31,8 @@ dependencies {
 //    compile 'gorden.refresh:refresh-kotlin:1.0'
     compile project(path: ':refresh-kotlin')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:appcompat-v7:27.0.0'
+    compile 'com.android.support:design:27.0.0'
     testCompile 'junit:junit:4.12'
 }
 repositories {

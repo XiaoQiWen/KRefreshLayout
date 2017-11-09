@@ -1,6 +1,7 @@
 package gorden.refresh
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.NestedScrollingParent
@@ -16,10 +17,10 @@ import android.widget.AbsListView
 import android.widget.OverScroller
 import android.widget.ScrollView
 
-@Suppress("unused", "UNUSED_PARAMETER")
+@Suppress("unused", "PrivatePropertyName", "MemberVisibilityCanPrivate")
 /**
  * Universal pull down the refresh frame
- * version 1.1
+ * version 1.31
  */
 class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : ViewGroup(context, attrs, defStyleAttr), NestedScrollingParent {
     private val LOG_TAG = "LOG_KRefreshLayout"
@@ -90,29 +91,23 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        if (childCount > 2) {
-            throw IllegalStateException("KRefreshLayout111 can only accommodate two elements")
-        } else if (childCount == 1) {
-            mContentView = getChildAt(0)
-        } else if (childCount == 2) {
-            mContentView = getChildAt(1)
-            mHeader = getChildAt(0) as? KRefreshHeader ?: return
-            mHeaderView = getChildAt(0)
+        when {
+            childCount > 2 -> throw IllegalStateException("KRefreshLayout111 can only accommodate two elements")
+            childCount == 1 -> mContentView = getChildAt(0)
+            childCount == 2 -> {
+                mContentView = getChildAt(1)
+                mHeader = getChildAt(0) as? KRefreshHeader ?: return
+                mHeaderView = getChildAt(0)
+            }
         }
         mHeaderView?.bringToFront()
     }
 
-    override fun generateDefaultLayoutParams(): LayoutParams {
-        return LayoutParams(MATCH_PARENT, MATCH_PARENT)
-    }
+    override fun generateDefaultLayoutParams(): LayoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
 
-    override fun generateLayoutParams(attrs: AttributeSet): LayoutParams {
-        return LayoutParams(context, attrs)
-    }
+    override fun generateLayoutParams(attrs: AttributeSet): LayoutParams = LayoutParams(context, attrs)
 
-    override fun generateLayoutParams(p: ViewGroup.LayoutParams): LayoutParams {
-        return LayoutParams(p)
-    }
+    override fun generateLayoutParams(p: ViewGroup.LayoutParams): LayoutParams = LayoutParams(p)
 
     @Suppress("unused")
     class LayoutParams : ViewGroup.MarginLayoutParams {
@@ -148,7 +143,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        (0..childCount - 1).map { getChildAt(it) }
+        (0 until childCount).map { getChildAt(it) }
                 .forEach { measureChildWithMargins(it, widthMeasureSpec, 0, heightMeasureSpec, 0) }
     }
 
@@ -204,13 +199,15 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
 
 
     override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
-        if ((android.os.Build.VERSION.SDK_INT < 21 && mContentView is AbsListView) || !ViewCompat.isNestedScrollingEnabled(mContentView)) {
+        if ((android.os.Build.VERSION.SDK_INT < 21 && mContentView is AbsListView) || (mContentView!=null&&!ViewCompat.isNestedScrollingEnabled(mContentView!!))) {
 
         } else {
             super.requestDisallowInterceptTouchEvent(disallowIntercept)
         }
     }
 
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isEnabled || mNestedScrollExecute || canChildScrollUp())
             return false
@@ -258,9 +255,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         }
     }
 
-    private fun canChildScrollUp(): Boolean {
-        return ViewCompat.canScrollVertically(mContentView, -1)
-    }
+    private fun canChildScrollUp(): Boolean = mContentView?.canScrollVertically( -1)?:false
 
     override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
         return isEnabled && refreshEnable && !(mRefreshing && pinContent && keepHeaderWhenRefresh)
@@ -368,25 +363,23 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         val maxOffset = mHeader?.maxOffsetHeight() ?: if (defaultMaxOffset == -1) height else defaultMaxOffset
         val mOffset: Int
         val downResistance: Float
-        if (offset > 0) {
-            downResistance = 0.8f
+        downResistance = if (offset > 0) {
+            0.8f
         } else {
             //下拉阻力(0f-1f) 越小阻力越大，当前计算公式:1-mCurrentOffset/maxheight
-            downResistance = 1f - mCurrentOffset.toFloat() / maxOffset
+            1f - mCurrentOffset.toFloat() / maxOffset
         }
-        if (offset > 0) {
-            mOffset = Math.min(MAX_OFFSET, Math.ceil((downResistance * offset).toDouble()).toInt())
+        mOffset = if (offset > 0) {
+            Math.min(MAX_OFFSET, Math.ceil((downResistance * offset).toDouble()).toInt())
         } else {
-            mOffset = Math.max(-MAX_OFFSET, Math.floor((downResistance * offset).toDouble()).toInt())
+            Math.max(-MAX_OFFSET, Math.floor((downResistance * offset).toDouble()).toInt())
         }
         return mOffset
     }
 
     /**
      * 移动视图
-
      * @param offset 偏移量
-     * *               //     * @param requiresUpdate 是否需要更新
      */
     private fun moveView(offset: Int) {
         var invalidate = false
@@ -465,7 +458,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mOffsetAnimator.start()
     }
 
-    fun setKRefreshListener(refreshListener: (refreshLayout: KRefreshLayout) -> Unit): Unit {
+    fun setKRefreshListener(refreshListener: (refreshLayout: KRefreshLayout) -> Unit){
         mRefreshListener = refreshListener
     }
 
@@ -475,7 +468,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
      * percent(偏移比率)
      * refreshing(是否在刷新)
      */
-    fun setKScrollListener(scrollListener: (offset: Int, distance: Int, percent: Float, refreshing: Boolean) -> Unit): Unit {
+    fun setKScrollListener(scrollListener: (offset: Int, distance: Int, percent: Float, refreshing: Boolean) -> Unit){
         mScrollListener = scrollListener
     }
 
@@ -498,9 +491,7 @@ class KRefreshLayout(context: Context, attrs: AttributeSet?, defStyleAttr: Int) 
         mHeaderView?.bringToFront()
     }
 
-    fun getHeader(): KRefreshHeader? {
-        return mHeader
-    }
+    fun getHeader(): KRefreshHeader? = mHeader
 
     fun removeHeader() {
         removeView(mHeaderView)

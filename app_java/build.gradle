@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.1"
 
     defaultConfig {
         applicationId "gorden.jrefresh.demo"
         minSdkVersion 15
-        targetSdkVersion 25
         versionCode 1
         versionName "1.1"
     }
@@ -21,7 +20,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:27.0.0'
+    compile 'com.android.support:appcompat-v7:27.0.0'
     compile project(':refresh-java')
 }
